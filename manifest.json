@@ -1,0 +1,24 @@
+{
+  "name": "AtmosphericTempCalc - Калькулятор температуры атмосферы",
+  "short_name": "AtmosphericCalc",
+  "start_url": "/airPressure/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#fce000",
+  "orientation": "portrait-primary",
+  "description": "Профессиональный инструмент для расчета температуры атмосферы на основе концентрации газов",
+  "icons": [
+    {
+      "src": "/airPressure/logo192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/airPressure/logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}

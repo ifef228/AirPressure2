@@ -1,0 +1,44 @@
+{
+  "nodes": [
+    {
+      "id": "src/pages/Home.tsx",
+      "label": "Home",
+      "routes": [
+        "/"
+      ],
+      "isRoot": true
+    },
+    {
+      "id": "src/pages/GasesList.tsx",
+      "label": "GasesList",
+      "routes": [
+        "/gases"
+      ]
+    },
+    {
+      "id": "src/pages/GasDetail.tsx",
+      "label": "GasDetail",
+      "routes": [
+        "/gases/:id"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "src/pages/GasDetail.tsx:77:14-to-src/pages/GasesList.tsx",
+      "source": "src/pages/GasDetail.tsx",
+      "target": "src/pages/GasesList.tsx",
+      "data": {
+        "viaRoute": "/gases",
+        "trigger": {
+          "element": "<Button as={Link} to=\"/gases\" variant=\"primary\">\n                Вернуться к списку\n              </Button>",
+          "line": 77,
+          "endLine": 79,
+          "column": 14,
+          "endColumn": 23,
+          "sourceFile": "src/pages/GasDetail.tsx"
+        }
+      }
+    }
+  ]
+}
