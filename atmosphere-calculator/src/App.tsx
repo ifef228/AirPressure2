@@ -9,8 +9,8 @@ import GasesList from './pages/GasesList';
 import GasDetail from './pages/GasDetail';
 
 const App: FC = () => {
-  // Всегда используем один basename
-  const basename = '/airPressure';
+  // Всегда используем один basename - название репозитория
+  const basename = '/AirPressure2';
 
   return (
     <CartProvider>

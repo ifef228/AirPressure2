@@ -1,8 +1,17 @@
 import { Gas, PaginatedResponse, ApiResponse, GasesFilter } from '../types';
 import { getMockGasesPaginated, getMockGasById } from '../data/mockGasesData';
 
-// Базовый URL API - всегда используем один путь
-const API_BASE_URL = '/airPressure/api';
+// Базовый URL API - используем относительный путь, Service Worker будет проксировать
+// Для GitHub Pages используем путь с base path
+const getBasePath = () => {
+  // В production на GitHub Pages это будет /AirPressure2
+  if (window.location.pathname.startsWith('/AirPressure2')) {
+    return '/AirPressure2';
+  }
+  return '';
+};
+
+const API_BASE_URL = `${getBasePath()}/api`;
 
 // Флаг для определения доступности бэкенда
 let backendAvailable = true;

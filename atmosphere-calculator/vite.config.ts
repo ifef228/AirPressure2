@@ -6,8 +6,8 @@ import { defineConfig } from "vite";
 export default defineConfig(({ mode }) => ({
   plugins: [react(), mode === "development" && screenGraphPlugin()],
   publicDir: "./public",
-  // Всегда используем один base path
-  base: "/airPressure/",
+  // Всегда используем один base path - название репозитория
+  base: "/AirPressure2/",
   build: {
     outDir: "dist",
     assetsDir: "assets",
@@ -22,11 +22,11 @@ export default defineConfig(({ mode }) => ({
     port: 5173,
     host: '0.0.0.0',
     proxy: {
-      '/airPressure/api': {
+      '/AirPressure2/api': {
         target: 'http://192.168.1.13:8080',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/airPressure\/api/, '/api')
+        rewrite: (path) => path.replace(/^\/AirPressure2\/api/, '/api')
       }
     }
   }

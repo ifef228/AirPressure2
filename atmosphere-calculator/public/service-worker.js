@@ -1,11 +1,11 @@
 // Service Worker для PWA
 const CACHE_NAME = 'atmospheric-calc-v1';
 
-// Определяем base path (для GitHub Pages это /airPressure/)
+// Определяем base path (для GitHub Pages это /AirPressure2/)
 const getBasePath = () => {
   const scope = self.registration?.scope || self.location.pathname;
-  if (scope.includes('/airPressure/')) {
-    return '/airPressure';
+  if (scope.includes('/AirPressure2/')) {
+    return '/AirPressure2';
   }
   return '';
 };
@@ -43,7 +43,7 @@ self.addEventListener('install', (event) => {
 
 // Активация Service Worker и очистка старых кешей
 self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Активация Service Worker');
+  console.log('[Service Worker] Активация Service Worker, BACKEND_URL:', BACKEND_URL);
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -60,10 +60,8 @@ self.addEventListener('activate', (event) => {
 });
 
 // Конфигурация API для перехвата запросов (для GitHub Pages)
-// Установите BACKEND_IP через сообщение от клиента или используйте значение по умолчанию
-let BACKEND_IP = null;
-let BACKEND_PORT = '8080';
-let USE_HTTPS = false;
+// Установите BACKEND_URL через сообщение от клиента или используйте значение по умолчанию
+let BACKEND_URL = 'https://192.168.1.13:8080';
 
 // Перехват сетевых запросов
 self.addEventListener('fetch', (event) => {
@@ -74,81 +72,139 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // Перехватываем запросы к /api для перенаправления на бэкенд по IP
-  // Это нужно для GitHub Pages, которые работают по HTTPS, но бэкенд может быть на HTTP в локальной сети
-  // Также обрабатываем запросы с base path /airPressure/api
-  // И запросы к ifef228.github.io/api (без base path, если они случайно пошли)
+  // Перехватываем запросы к /api для перенаправления на бэкенд
+  // Это нужно для GitHub Pages, которые работают по HTTPS
+  // Обрабатываем запросы с base path /AirPressure2/api и без него
   const isApiRequest = url.pathname.startsWith('/api') ||
-                       url.pathname.startsWith('/airPressure/api') ||
+                       url.pathname.startsWith('/AirPressure2/api') ||
                        (url.hostname.includes('github.io') && url.pathname.includes('/api'));
 
-  console.log('[Service Worker] Запрос:', url.href, 'isApiRequest:', isApiRequest, 'BACKEND_IP:', BACKEND_IP);
+  console.log('[Service Worker] Запрос:', url.href, 'isApiRequest:', isApiRequest, 'BACKEND_URL:', BACKEND_URL);
 
-  if (isApiRequest && BACKEND_IP) {
-    const protocol = USE_HTTPS ? 'https' : 'http';
-    const port = USE_HTTPS ? '8443' : BACKEND_PORT;
-
-    // Убираем base path если есть и нормализуем путь
-    let apiPath = url.pathname;
-
-    // Убираем /airPressure если есть
-    if (apiPath.startsWith('/airPressure/api')) {
-      apiPath = apiPath.replace('/airPressure', '');
-    } else if (apiPath.startsWith('/airPressure')) {
-      apiPath = apiPath.replace('/airPressure', '');
-    }
-
-    // Если путь не начинается с /api, добавляем его
-    // Это для случаев, когда запрос идет на /api напрямую
-    if (!apiPath.startsWith('/api')) {
-      // Если путь содержит /api, извлекаем часть после /api
-      const apiIndex = apiPath.indexOf('/api');
-      if (apiIndex !== -1) {
-        apiPath = apiPath.substring(apiIndex);
-      } else {
-        // Если /api нет, добавляем его
-        apiPath = '/api' + (apiPath.startsWith('/') ? '' : '/') + apiPath;
-      }
-    }
-
-    const backendUrl = `${protocol}://${BACKEND_IP}:${port}${apiPath}${url.search}`;
-
-    console.log('[Service Worker] Перенаправление API запроса:', url.pathname, '->', backendUrl);
-
-    event.respondWith(
-      fetch(backendUrl, {
-        method: event.request.method,
-        headers: event.request.headers,
-        body: event.request.body,
-        mode: 'cors',
-        credentials: 'omit' // CORS может не разрешать credentials
-      })
-      .then((response) => {
-        // Проверяем, что ответ успешный
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        return response;
-      })
-      .catch((error) => {
-        console.error('[Service Worker] Ошибка при запросе к бэкенду:', error);
-        console.error('[Service Worker] URL:', backendUrl);
-
-        // Возвращаем понятную ошибку
-        return new Response(JSON.stringify({
+  // Перехватываем API запросы и проксируем на реальный бэкенд
+  if (isApiRequest) {
+    if (!BACKEND_URL) {
+      console.error('[Service Worker] BACKEND_URL не настроен!');
+      event.respondWith(
+        new Response(JSON.stringify({
           success: false,
-          message: `Не удалось подключиться к бэкенду ${BACKEND_IP}:${BACKEND_PORT}. ` +
-                   `Проверьте, что бэкенд запущен и доступен в локальной сети. ` +
-                   `Ошибка: ${error.message}`
+          message: 'Backend URL не настроен в Service Worker'
         }), {
           status: 503,
           statusText: 'Service Unavailable',
-          headers: new Headers({
+          headers: {
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-          })
-        });
-      })
+            'Access-Control-Allow-Origin': '*',
+          },
+        })
+      );
+      return;
+    }
+    event.respondWith(
+      (async () => {
+        try {
+          // Извлекаем путь API (убираем base path если есть)
+          let apiPath = url.pathname;
+          if (apiPath.startsWith('/AirPressure2/api')) {
+            apiPath = apiPath.replace('/AirPressure2/api', '/api');
+          } else if (apiPath.startsWith('/api')) {
+            // Уже правильный путь
+          } else {
+            // Извлекаем /api/... из пути
+            const apiIndex = apiPath.indexOf('/api');
+            if (apiIndex !== -1) {
+              apiPath = apiPath.substring(apiIndex);
+            }
+          }
+
+          // Формируем URL для бэкенда
+          const backendUrl = `${BACKEND_URL}${apiPath}${url.search}`;
+          console.log('[Service Worker] Проксирование API запроса:', {
+            original: url.href,
+            backend: backendUrl,
+            method: event.request.method,
+            pathname: url.pathname,
+            apiPath: apiPath
+          });
+
+          // Создаем заголовки, исключая те, которые могут вызвать проблемы
+          const headers = new Headers();
+          // Копируем только безопасные заголовки
+          event.request.headers.forEach((value, key) => {
+            // Исключаем host и другие заголовки, которые браузер устанавливает автоматически
+            const lowerKey = key.toLowerCase();
+            if (lowerKey !== 'host' && lowerKey !== 'referer' && lowerKey !== 'origin') {
+              headers.set(key, value);
+            }
+          });
+
+          // Создаем новый запрос с теми же параметрами, но на другой URL
+          const requestInit = {
+            method: event.request.method,
+            headers: headers,
+            mode: 'cors', // Разрешаем CORS
+            credentials: 'omit', // Не отправляем cookies
+            cache: 'no-cache', // Не кешируем API запросы
+          };
+
+          // Копируем body только для методов, которые могут иметь body (POST, PUT, PATCH)
+          const methodsWithBody = ['POST', 'PUT', 'PATCH'];
+          if (methodsWithBody.includes(event.request.method.toUpperCase())) {
+            try {
+              const clonedRequest = event.request.clone();
+              requestInit.body = await clonedRequest.arrayBuffer();
+            } catch (bodyError) {
+              console.warn('[Service Worker] Не удалось прочитать body:', bodyError);
+              // Продолжаем без body, если не удалось его прочитать
+            }
+          }
+
+          console.log('[Service Worker] Отправка запроса на бэкенд:', backendUrl);
+          const response = await fetch(backendUrl, requestInit);
+
+          console.log('[Service Worker] Ответ от бэкенда:', {
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok,
+            url: backendUrl
+          });
+
+          // Создаем новый Response с правильными заголовками CORS
+          const responseHeaders = new Headers(response.headers);
+          // Добавляем CORS заголовки, если их нет
+          if (!responseHeaders.has('Access-Control-Allow-Origin')) {
+            responseHeaders.set('Access-Control-Allow-Origin', '*');
+          }
+
+          // Клонируем ответ для возврата
+          return new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: responseHeaders
+          });
+        } catch (error) {
+          console.error('[Service Worker] Ошибка проксирования API запроса:', {
+            error: error.message,
+            stack: error.stack,
+            url: url.href,
+            backendUrl: BACKEND_URL
+          });
+          // Возвращаем ошибку с подробной информацией
+          return new Response(JSON.stringify({
+            success: false,
+            message: 'Ошибка подключения к серверу: ' + error.message,
+            error: error.toString(),
+            backendUrl: BACKEND_URL
+          }), {
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+            },
+          });
+        }
+      })()
     );
     return;
   }
@@ -199,15 +255,37 @@ self.addEventListener('fetch', (event) => {
 
 // Обработка сообщений от клиента
 self.addEventListener('message', (event) => {
+  console.log('[Service Worker] Получено сообщение:', event.data);
+
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
 
   // Настройка бэкенда для перехвата API запросов
   if (event.data && event.data.type === 'SET_BACKEND_CONFIG') {
-    BACKEND_IP = event.data.ip || null;
-    BACKEND_PORT = event.data.port || '8080';
-    USE_HTTPS = event.data.https || false;
-    console.log('[Service Worker] Настроен бэкенд:', BACKEND_IP, BACKEND_PORT, USE_HTTPS ? 'HTTPS' : 'HTTP');
+    const oldUrl = BACKEND_URL;
+    if (event.data.url) {
+      BACKEND_URL = event.data.url;
+    } else if (event.data.ip) {
+      const protocol = event.data.https ? 'https' : 'http';
+      const port = event.data.port || '8080';
+      BACKEND_URL = `${protocol}://${event.data.ip}:${port}`;
+    }
+    console.log('[Service Worker] Настроен бэкенд URL:', {
+      old: oldUrl,
+      new: BACKEND_URL,
+      received: event.data
+    });
+
+    // Отправляем подтверждение обратно клиенту через все клиенты
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'BACKEND_CONFIG_SET',
+          success: true,
+          backendUrl: BACKEND_URL
+        });
+      });
+    });
   }
 });

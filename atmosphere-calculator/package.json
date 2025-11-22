@@ -10,12 +10,14 @@
     "preview": "vite preview",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
+    "deploy:force": "gh-pages -d dist --force",
+    "deploy:check": "echo 'Проверка настроек деплоя...' && cd .. && git remote -v && echo '' && echo 'Название репозитория:' && node atmosphere-calculator/scripts/get-repo-name.cjs",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
     "detect-ip": "node scripts/detect-ip.js"
   },
-    "homepage": "https://ifef228.github.io/airPressure/",
+    "homepage": "https://ifef228.github.io/AirPressure2/airPressure/",
     "dependencies": {
         "@reduxjs/toolkit": "^2.10.1",
         "bootstrap": "^5.3.2",
