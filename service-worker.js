@@ -82,74 +82,14 @@ self.addEventListener('fetch', (event) => {
                        url.pathname.startsWith('/AirPressure2/api') ||
                        (url.hostname.includes('github.io') && url.pathname.includes('/api'));
 
-  console.log('[Service Worker] Запрос:', url.href, 'isApiRequest:', isApiRequest, 'BACKEND_IP:', BACKEND_IP);
+  console.log('[Service Worker] Запрос:', url.href, 'isApiRequest:', isApiRequest);
 
-  if (isApiRequest && BACKEND_IP) {
-    const protocol = USE_HTTPS ? 'https' : 'http';
-    const port = USE_HTTPS ? '8443' : BACKEND_PORT;
-
-    // Убираем base path если есть и нормализуем путь
-    let apiPath = url.pathname;
-
-    // Убираем /AirPressure2 если есть
-    if (apiPath.startsWith('/AirPressure2/api')) {
-      apiPath = apiPath.replace('/AirPressure2', '');
-    } else if (apiPath.startsWith('/AirPressure2')) {
-      apiPath = apiPath.replace('/AirPressure2', '');
-    }
-
-    // Если путь не начинается с /api, добавляем его
-    // Это для случаев, когда запрос идет на /api напрямую
-    if (!apiPath.startsWith('/api')) {
-      // Если путь содержит /api, извлекаем часть после /api
-      const apiIndex = apiPath.indexOf('/api');
-      if (apiIndex !== -1) {
-        apiPath = apiPath.substring(apiIndex);
-      } else {
-        // Если /api нет, добавляем его
-        apiPath = '/api' + (apiPath.startsWith('/') ? '' : '/') + apiPath;
-      }
-    }
-
-    const backendUrl = `${protocol}://${BACKEND_IP}:${port}${apiPath}${url.search}`;
-
-    console.log('[Service Worker] Перенаправление API запроса:', url.pathname, '->', backendUrl);
-
-    event.respondWith(
-      fetch(backendUrl, {
-        method: event.request.method,
-        headers: event.request.headers,
-        body: event.request.body,
-        mode: 'cors',
-        credentials: 'omit' // CORS может не разрешать credentials
-      })
-      .then((response) => {
-        // Проверяем, что ответ успешный
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        return response;
-      })
-      .catch((error) => {
-        console.error('[Service Worker] Ошибка при запросе к бэкенду:', error);
-        console.error('[Service Worker] URL:', backendUrl);
-
-        // Возвращаем понятную ошибку
-        return new Response(JSON.stringify({
-          success: false,
-          message: `Не удалось подключиться к бэкенду ${BACKEND_IP}:${BACKEND_PORT}. ` +
-                   `Проверьте, что бэкенд запущен и доступен в локальной сети. ` +
-                   `Ошибка: ${error.message}`
-        }), {
-          status: 503,
-          statusText: 'Service Unavailable',
-          headers: new Headers({
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-          })
-        });
-      })
-    );
+  // НЕ перехватываем API запросы - пусть идут напрямую
+  // Service Worker не может делать HTTP запросы с HTTPS страницы (mixed content)
+  // API запросы должны идти напрямую, а бэкенд должен быть доступен из интернета
+  // или использовать другой подход (например, прокси сервер)
+  if (isApiRequest) {
+    // Пропускаем API запросы - пусть идут напрямую без перехвата
     return;
   }
 
