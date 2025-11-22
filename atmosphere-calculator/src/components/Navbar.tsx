@@ -35,15 +35,22 @@ const Navbar: FC = () => {
   };
 
   return (
-    <BSNavbar bg="dark" variant="dark" expand="lg" className="mb-0" style={{ backgroundColor: '#ffffff' }}>
-      <Container>
-        <BSNavbar.Brand as={Link} to="/" style={{ fontSize: '1.5rem', fontWeight: '700' }}>
-          🌡️ AtmosphericTempCalc
+    <BSNavbar bg="dark" variant="dark" expand="lg" className="mb-0 navbar-custom" style={{ backgroundColor: '#ffffff' }}>
+      <Container fluid className="px-2 px-md-3">
+        <BSNavbar.Brand
+          as={Link}
+          to="/"
+          className="navbar-brand-responsive"
+          style={{ fontSize: '1.5rem', fontWeight: '700', flexShrink: 0 }}
+        >
+          🌡️ <span className="d-none d-sm-inline">AtmosphericTempCalc</span>
+          <span className="d-sm-none">ATC</span>
         </BSNavbar.Brand>
 
-        {/* Мини-игра: Светофор */}
+        {/* Мини-игра: Светофор - только на десктопе */}
         <div
           onClick={switchTrafficLight}
+          className="traffic-light-responsive d-none d-lg-flex"
           style={{
             cursor: 'pointer',
             padding: '0.5rem',
@@ -54,6 +61,9 @@ const Navbar: FC = () => {
             borderRadius: '8px',
             border: '2px solid #555',
             transition: 'transform 0.2s ease',
+            flexShrink: 0,
+            marginLeft: 'auto',
+            marginRight: '1rem',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'scale(1.1)';
@@ -65,6 +75,7 @@ const Navbar: FC = () => {
         >
           {/* Красный свет */}
           <div
+            className="traffic-light-dot"
             style={{
               width: '20px',
               height: '20px',
@@ -78,6 +89,7 @@ const Navbar: FC = () => {
 
           {/* Желтый свет */}
           <div
+            className="traffic-light-dot"
             style={{
               width: '20px',
               height: '20px',
@@ -91,6 +103,7 @@ const Navbar: FC = () => {
 
           {/* Зеленый свет */}
           <div
+            className="traffic-light-dot"
             style={{
               width: '20px',
               height: '20px',
@@ -103,13 +116,15 @@ const Navbar: FC = () => {
           />
         </div>
 
-        <BSNavbar.Toggle aria-controls="basic-navbar-nav" />
+        <BSNavbar.Toggle aria-controls="basic-navbar-nav" className="navbar-toggler-custom" />
+
         <BSNavbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto">
             <Nav.Link
               as={Link}
               to="/"
               active={location.pathname === '/'}
+              className="nav-link-responsive"
             >
               Главная
             </Nav.Link>
@@ -117,6 +132,7 @@ const Navbar: FC = () => {
               as={Link}
               to="/gases"
               active={location.pathname === '/gases'}
+              className="nav-link-responsive"
             >
               Услуги (Газы)
             </Nav.Link>

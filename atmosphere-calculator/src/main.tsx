@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
@@ -25,22 +26,24 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
-      .register('/service-worker.js')
+      .register('/airPressure/service-worker.js', { scope: '/airPressure/' })
       .then((registration) => {
         console.log('Service Worker зарегистрирован:', registration.scope);
 
-        // Проверка обновлений
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing;
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('Доступно обновление приложения!');
-                // Можно показать уведомление пользователю
-              }
-            });
-          }
-        });
+        // Настройка бэкенда для Service Worker
+        const setupBackend = (worker: ServiceWorker | null) => {
+          if (!worker) return;
+          worker.postMessage({
+            type: 'SET_BACKEND_CONFIG',
+            ip: '192.168.1.13',
+            port: '8080',
+            https: false
+          });
+        };
+
+        if (registration.active) {
+          setupBackend(registration.active);
+        }
       })
       .catch((error) => {
         console.log('Ошибка регистрации Service Worker:', error);

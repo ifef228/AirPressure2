@@ -3,15 +3,176 @@
 /* ===== NAVBAR АДАПТИВНОСТЬ ===== */
 /* Бургер-меню уже встроено в Bootstrap, но добавим дополнительные стили */
 
+.navbar-custom {
+  position: relative;
+  z-index: 1000;
+}
+
+.navbar-brand-responsive {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+  margin-right: 1rem;
+}
+
+.traffic-light-responsive {
+  flex-shrink: 0;
+}
+
+.traffic-light-dot {
+  flex-shrink: 0;
+}
+
+.nav-link-responsive {
+  white-space: nowrap;
+  padding: 0.5rem 1rem !important;
+  display: block !important;
+}
+
+.navbar-toggler-custom {
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 0.25rem 0.5rem !important;
+  margin-left: auto !important;
+  z-index: 1001;
+}
+
+/* Убеждаемся, что кнопки видны в мобильном меню */
+.navbar-collapse {
+  width: 100% !important;
+  clear: both;
+  margin-top: 0.5rem;
+}
+
+.navbar-collapse .nav {
+  width: 100%;
+  flex-direction: column;
+  background-color: #ffffff;
+  padding: 0.5rem 0;
+}
+
+@media (min-width: 992px) {
+  .navbar-collapse {
+    margin-top: 0;
+  }
+
+  .navbar-collapse .nav {
+    flex-direction: row;
+    background-color: transparent;
+    padding: 0;
+  }
+}
+
 @media (max-width: 991px) {
   .navbar-brand {
     font-size: 1.2rem !important;
+    max-width: calc(100% - 60px);
+    margin-right: 0.5rem !important;
+  }
+
+  .traffic-light-responsive {
+    padding: 0.3rem !important;
+    gap: 0.2rem !important;
+  }
+
+  .traffic-light-dot {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  /* Бургер-меню всегда видно */
+  .navbar-toggler {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 1002 !important;
+  }
+
+  /* Кнопки навигации на всю ширину в мобильном меню */
+  .navbar-collapse .nav-link {
+    width: 100% !important;
+    text-align: left !important;
+    padding: 0.75rem 1rem !important;
+    margin: 0 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #000 !important;
+    font-size: 1rem !important;
+  }
+
+  .navbar-collapse .nav-link:hover {
+    background-color: #f8f9fa !important;
+  }
+
+  /* Убеждаемся, что collapse меню видно */
+  .navbar-collapse.show {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }
 
 @media (max-width: 576px) {
   .navbar-brand {
     font-size: 1rem !important;
+    max-width: calc(100% - 50px);
+    margin-right: 0.25rem !important;
+  }
+
+  .traffic-light-responsive {
+    padding: 0.25rem !important;
+    gap: 0.15rem !important;
+  }
+
+  .traffic-light-dot {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  /* Убеждаемся, что бургер-меню видно */
+  .navbar-toggler {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 1rem !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 1002 !important;
+    margin-left: auto !important;
+  }
+
+  /* Кнопки навигации на всю ширину */
+  .navbar-collapse .nav-link {
+    width: 100% !important;
+    text-align: left !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 1rem !important;
+    margin: 0 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #000 !important;
+  }
+
+  .navbar-collapse .nav-link:hover {
+    background-color: #f8f9fa !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .navbar-brand {
+    font-size: 0.9rem !important;
+  }
+
+  .traffic-light-responsive {
+    padding: 0.2rem !important;
+  }
+
+  .traffic-light-dot {
+    width: 12px !important;
+    height: 12px !important;
   }
 }
 

@@ -9,8 +9,8 @@ import GasesList from './pages/GasesList';
 import GasDetail from './pages/GasDetail';
 
 const App: FC = () => {
-  // Определяем basename для GitHub Pages
-  const basename = import.meta.env.PROD ? '/airPressure' : '';
+  // Всегда используем один basename
+  const basename = '/airPressure';
 
   return (
     <CartProvider>

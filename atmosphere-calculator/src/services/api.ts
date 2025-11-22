@@ -1,7 +1,8 @@
 import { Gas, PaginatedResponse, ApiResponse, GasesFilter } from '../types';
 import { getMockGasesPaginated, getMockGasById } from '../data/mockGasesData';
 
-const API_BASE_URL = '/api'; // Проксируется через Vite на http://localhost:8080/api
+// Базовый URL API - всегда используем один путь
+const API_BASE_URL = '/airPressure/api';
 
 // Флаг для определения доступности бэкенда
 let backendAvailable = true;
@@ -20,8 +21,8 @@ export const getGases = async (filters: GasesFilter = {}): Promise<PaginatedResp
     params.append('page', page.toString());
     params.append('size', size.toString());
 
+    // Формируем URL
     const url = `${API_BASE_URL}/gases?${params.toString()}`;
-    console.log('Fetching gases from:', url);
 
     const response = await fetch(url, {
       method: 'GET',
@@ -57,6 +58,7 @@ export const getGases = async (filters: GasesFilter = {}): Promise<PaginatedResp
  */
 export const getGasById = async (id: number): Promise<Gas | null> => {
   try {
+    // Формируем URL - API_BASE_URL уже содержит правильный путь с base path
     const url = `${API_BASE_URL}/gases/${id}`;
     console.log('Fetching gas by id:', url);
 
