@@ -1,11 +1,11 @@
 // Service Worker для PWA
 const CACHE_NAME = 'atmospheric-calc-v1';
 
-// Определяем base path (для GitHub Pages это /airPressure/)
+// Определяем base path (для GitHub Pages это /AirPressure2/)
 const getBasePath = () => {
   const scope = self.registration?.scope || self.location.pathname;
-  if (scope.includes('/airPressure/')) {
-    return '/airPressure';
+  if (scope.includes('/AirPressure2/')) {
+    return '/AirPressure2';
   }
   return '';
 };
@@ -76,10 +76,10 @@ self.addEventListener('fetch', (event) => {
 
   // Перехватываем запросы к /api для перенаправления на бэкенд по IP
   // Это нужно для GitHub Pages, которые работают по HTTPS, но бэкенд может быть на HTTP в локальной сети
-  // Также обрабатываем запросы с base path /airPressure/api
+  // Также обрабатываем запросы с base path /AirPressure2/api
   // И запросы к ifef228.github.io/api (без base path, если они случайно пошли)
   const isApiRequest = url.pathname.startsWith('/api') ||
-                       url.pathname.startsWith('/airPressure/api') ||
+                       url.pathname.startsWith('/AirPressure2/api') ||
                        (url.hostname.includes('github.io') && url.pathname.includes('/api'));
 
   console.log('[Service Worker] Запрос:', url.href, 'isApiRequest:', isApiRequest, 'BACKEND_IP:', BACKEND_IP);
@@ -91,11 +91,11 @@ self.addEventListener('fetch', (event) => {
     // Убираем base path если есть и нормализуем путь
     let apiPath = url.pathname;
 
-    // Убираем /airPressure если есть
-    if (apiPath.startsWith('/airPressure/api')) {
-      apiPath = apiPath.replace('/airPressure', '');
-    } else if (apiPath.startsWith('/airPressure')) {
-      apiPath = apiPath.replace('/airPressure', '');
+    // Убираем /AirPressure2 если есть
+    if (apiPath.startsWith('/AirPressure2/api')) {
+      apiPath = apiPath.replace('/AirPressure2', '');
+    } else if (apiPath.startsWith('/AirPressure2')) {
+      apiPath = apiPath.replace('/AirPressure2', '');
     }
 
     // Если путь не начинается с /api, добавляем его
