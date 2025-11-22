@@ -43,7 +43,7 @@ self.addEventListener('install', (event) => {
 
 // Активация Service Worker и очистка старых кешей
 self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Активация Service Worker');
+  console.log('[Service Worker] Активация Service Worker, BACKEND_URL:', BACKEND_URL);
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -82,7 +82,24 @@ self.addEventListener('fetch', (event) => {
   console.log('[Service Worker] Запрос:', url.href, 'isApiRequest:', isApiRequest, 'BACKEND_URL:', BACKEND_URL);
 
   // Перехватываем API запросы и проксируем на реальный бэкенд
-  if (isApiRequest && BACKEND_URL) {
+  if (isApiRequest) {
+    if (!BACKEND_URL) {
+      console.error('[Service Worker] BACKEND_URL не настроен!');
+      event.respondWith(
+        new Response(JSON.stringify({
+          success: false,
+          message: 'Backend URL не настроен в Service Worker'
+        }), {
+          status: 503,
+          statusText: 'Service Unavailable',
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+        })
+      );
+      return;
+    }
     event.respondWith(
       (async () => {
         try {
@@ -102,37 +119,88 @@ self.addEventListener('fetch', (event) => {
 
           // Формируем URL для бэкенда
           const backendUrl = `${BACKEND_URL}${apiPath}${url.search}`;
-          console.log('[Service Worker] Проксирование API запроса:', backendUrl);
+          console.log('[Service Worker] Проксирование API запроса:', {
+            original: url.href,
+            backend: backendUrl,
+            method: event.request.method,
+            pathname: url.pathname,
+            apiPath: apiPath
+          });
+
+          // Создаем заголовки, исключая те, которые могут вызвать проблемы
+          const headers = new Headers();
+          // Копируем только безопасные заголовки
+          event.request.headers.forEach((value, key) => {
+            // Исключаем host и другие заголовки, которые браузер устанавливает автоматически
+            const lowerKey = key.toLowerCase();
+            if (lowerKey !== 'host' && lowerKey !== 'referer' && lowerKey !== 'origin') {
+              headers.set(key, value);
+            }
+          });
 
           // Создаем новый запрос с теми же параметрами, но на другой URL
           const requestInit = {
             method: event.request.method,
-            headers: new Headers(event.request.headers),
+            headers: headers,
             mode: 'cors', // Разрешаем CORS
             credentials: 'omit', // Не отправляем cookies
+            cache: 'no-cache', // Не кешируем API запросы
           };
 
-          // Копируем body только если он есть (для POST, PUT и т.д.)
-          if (event.request.body !== null) {
-            requestInit.body = await event.request.clone().arrayBuffer();
+          // Копируем body только для методов, которые могут иметь body (POST, PUT, PATCH)
+          const methodsWithBody = ['POST', 'PUT', 'PATCH'];
+          if (methodsWithBody.includes(event.request.method.toUpperCase())) {
+            try {
+              const clonedRequest = event.request.clone();
+              requestInit.body = await clonedRequest.arrayBuffer();
+            } catch (bodyError) {
+              console.warn('[Service Worker] Не удалось прочитать body:', bodyError);
+              // Продолжаем без body, если не удалось его прочитать
+            }
           }
 
+          console.log('[Service Worker] Отправка запроса на бэкенд:', backendUrl);
           const response = await fetch(backendUrl, requestInit);
 
+          console.log('[Service Worker] Ответ от бэкенда:', {
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok,
+            url: backendUrl
+          });
+
+          // Создаем новый Response с правильными заголовками CORS
+          const responseHeaders = new Headers(response.headers);
+          // Добавляем CORS заголовки, если их нет
+          if (!responseHeaders.has('Access-Control-Allow-Origin')) {
+            responseHeaders.set('Access-Control-Allow-Origin', '*');
+          }
+
           // Клонируем ответ для возврата
-          const responseClone = response.clone();
-          return responseClone;
+          return new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: responseHeaders
+          });
         } catch (error) {
-          console.error('[Service Worker] Ошибка проксирования API запроса:', error);
-          // Возвращаем ошибку
+          console.error('[Service Worker] Ошибка проксирования API запроса:', {
+            error: error.message,
+            stack: error.stack,
+            url: url.href,
+            backendUrl: BACKEND_URL
+          });
+          // Возвращаем ошибку с подробной информацией
           return new Response(JSON.stringify({
             success: false,
-            message: 'Ошибка подключения к серверу: ' + error.message
+            message: 'Ошибка подключения к серверу: ' + error.message,
+            error: error.toString(),
+            backendUrl: BACKEND_URL
           }), {
             status: 503,
             statusText: 'Service Unavailable',
             headers: {
               'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
             },
           });
         }
@@ -187,12 +255,15 @@ self.addEventListener('fetch', (event) => {
 
 // Обработка сообщений от клиента
 self.addEventListener('message', (event) => {
+  console.log('[Service Worker] Получено сообщение:', event.data);
+
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
 
   // Настройка бэкенда для перехвата API запросов
   if (event.data && event.data.type === 'SET_BACKEND_CONFIG') {
+    const oldUrl = BACKEND_URL;
     if (event.data.url) {
       BACKEND_URL = event.data.url;
     } else if (event.data.ip) {
@@ -200,12 +271,21 @@ self.addEventListener('message', (event) => {
       const port = event.data.port || '8080';
       BACKEND_URL = `${protocol}://${event.data.ip}:${port}`;
     }
-    console.log('[Service Worker] Настроен бэкенд URL:', BACKEND_URL);
+    console.log('[Service Worker] Настроен бэкенд URL:', {
+      old: oldUrl,
+      new: BACKEND_URL,
+      received: event.data
+    });
 
-    // Отправляем подтверждение обратно клиенту
-    event.ports[0]?.postMessage({
-      success: true,
-      backendUrl: BACKEND_URL
+    // Отправляем подтверждение обратно клиенту через все клиенты
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'BACKEND_CONFIG_SET',
+          success: true,
+          backendUrl: BACKEND_URL
+        });
+      });
     });
   }
 });
