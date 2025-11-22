@@ -60,10 +60,8 @@ self.addEventListener('activate', (event) => {
 });
 
 // Конфигурация API для перехвата запросов (для GitHub Pages)
-// Установите BACKEND_IP через сообщение от клиента или используйте значение по умолчанию
-let BACKEND_IP = null;
-let BACKEND_PORT = '8080';
-let USE_HTTPS = false;
+// Установите BACKEND_URL через сообщение от клиента или используйте значение по умолчанию
+let BACKEND_URL = 'https://192.168.1.13:8080';
 
 // Перехват сетевых запросов
 self.addEventListener('fetch', (event) => {
@@ -74,22 +72,72 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // Перехватываем запросы к /api для перенаправления на бэкенд по IP
-  // Это нужно для GitHub Pages, которые работают по HTTPS, но бэкенд может быть на HTTP в локальной сети
-  // Также обрабатываем запросы с base path /AirPressure2/api
-  // И запросы к ifef228.github.io/api (без base path, если они случайно пошли)
+  // Перехватываем запросы к /api для перенаправления на бэкенд
+  // Это нужно для GitHub Pages, которые работают по HTTPS
+  // Обрабатываем запросы с base path /AirPressure2/api и без него
   const isApiRequest = url.pathname.startsWith('/api') ||
                        url.pathname.startsWith('/AirPressure2/api') ||
                        (url.hostname.includes('github.io') && url.pathname.includes('/api'));
 
-  console.log('[Service Worker] Запрос:', url.href, 'isApiRequest:', isApiRequest);
+  console.log('[Service Worker] Запрос:', url.href, 'isApiRequest:', isApiRequest, 'BACKEND_URL:', BACKEND_URL);
 
-  // НЕ перехватываем API запросы - пусть идут напрямую
-  // Service Worker не может делать HTTP запросы с HTTPS страницы (mixed content)
-  // API запросы должны идти напрямую, а бэкенд должен быть доступен из интернета
-  // или использовать другой подход (например, прокси сервер)
-  if (isApiRequest) {
-    // Пропускаем API запросы - пусть идут напрямую без перехвата
+  // Перехватываем API запросы и проксируем на реальный бэкенд
+  if (isApiRequest && BACKEND_URL) {
+    event.respondWith(
+      (async () => {
+        try {
+          // Извлекаем путь API (убираем base path если есть)
+          let apiPath = url.pathname;
+          if (apiPath.startsWith('/AirPressure2/api')) {
+            apiPath = apiPath.replace('/AirPressure2/api', '/api');
+          } else if (apiPath.startsWith('/api')) {
+            // Уже правильный путь
+          } else {
+            // Извлекаем /api/... из пути
+            const apiIndex = apiPath.indexOf('/api');
+            if (apiIndex !== -1) {
+              apiPath = apiPath.substring(apiIndex);
+            }
+          }
+
+          // Формируем URL для бэкенда
+          const backendUrl = `${BACKEND_URL}${apiPath}${url.search}`;
+          console.log('[Service Worker] Проксирование API запроса:', backendUrl);
+
+          // Создаем новый запрос с теми же параметрами, но на другой URL
+          const requestInit = {
+            method: event.request.method,
+            headers: new Headers(event.request.headers),
+            mode: 'cors', // Разрешаем CORS
+            credentials: 'omit', // Не отправляем cookies
+          };
+
+          // Копируем body только если он есть (для POST, PUT и т.д.)
+          if (event.request.body !== null) {
+            requestInit.body = await event.request.clone().arrayBuffer();
+          }
+
+          const response = await fetch(backendUrl, requestInit);
+
+          // Клонируем ответ для возврата
+          const responseClone = response.clone();
+          return responseClone;
+        } catch (error) {
+          console.error('[Service Worker] Ошибка проксирования API запроса:', error);
+          // Возвращаем ошибку
+          return new Response(JSON.stringify({
+            success: false,
+            message: 'Ошибка подключения к серверу: ' + error.message
+          }), {
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+        }
+      })()
+    );
     return;
   }
 
@@ -145,9 +193,19 @@ self.addEventListener('message', (event) => {
 
   // Настройка бэкенда для перехвата API запросов
   if (event.data && event.data.type === 'SET_BACKEND_CONFIG') {
-    BACKEND_IP = event.data.ip || null;
-    BACKEND_PORT = event.data.port || '8080';
-    USE_HTTPS = event.data.https || false;
-    console.log('[Service Worker] Настроен бэкенд:', BACKEND_IP, BACKEND_PORT, USE_HTTPS ? 'HTTPS' : 'HTTP');
+    if (event.data.url) {
+      BACKEND_URL = event.data.url;
+    } else if (event.data.ip) {
+      const protocol = event.data.https ? 'https' : 'http';
+      const port = event.data.port || '8080';
+      BACKEND_URL = `${protocol}://${event.data.ip}:${port}`;
+    }
+    console.log('[Service Worker] Настроен бэкенд URL:', BACKEND_URL);
+
+    // Отправляем подтверждение обратно клиенту
+    event.ports[0]?.postMessage({
+      success: true,
+      backendUrl: BACKEND_URL
+    });
   }
 });
