@@ -1,0 +1,302 @@
+/* Яндекс Маркет стили с желтым цветом #fce000 */
+
+:root {
+  --yandex-yellow: #fce000;
+  --yandex-yellow-hover: #e6ca00;
+  --yandex-yellow-light: #fffdf0;
+  --yandex-black: #000000;
+  --yandex-gray: #666666;
+  --yandex-gray-light: #999999;
+  --yandex-bg: #f8f8f8;
+  --yandex-border: #e6e6e6;
+}
+
+body {
+  background-color: var(--yandex-bg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Переопределение Bootstrap цветов */
+.btn-primary {
+  background-color: var(--yandex-yellow) !important;
+  border-color: var(--yandex-yellow) !important;
+  color: var(--yandex-black) !important;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: var(--yandex-yellow-hover) !important;
+  border-color: var(--yandex-yellow-hover) !important;
+  color: var(--yandex-black) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(252, 224, 0, 0.3);
+}
+
+.btn-outline-primary {
+  background-color: #ffffff;
+  border-color: var(--yandex-yellow) !important;
+  color: var(--yandex-yellow) !important;
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--yandex-yellow-light) !important;
+  border-color: var(--yandex-yellow) !important;
+  color: var(--yandex-black) !important;
+}
+
+/* Navbar стили */
+.navbar-dark {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid var(--yandex-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.navbar-dark .navbar-brand {
+  color: var(--yandex-black) !important;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.navbar-dark .nav-link {
+  color: var(--yandex-gray) !important;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.navbar-dark .nav-link:hover,
+.navbar-dark .nav-link.active {
+  color: var(--yandex-black) !important;
+}
+
+/* Card стили */
+.card {
+  border: 1px solid var(--yandex-border);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  background: #ffffff;
+}
+
+.card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.card-title {
+  color: var(--yandex-black);
+  font-weight: 600;
+}
+
+.card-subtitle {
+  color: var(--yandex-gray);
+}
+
+.card-text {
+  color: var(--yandex-gray);
+}
+
+/* Breadcrumbs стили */
+.breadcrumb {
+  background-color: #ffffff;
+  border: 1px solid var(--yandex-border);
+  border-radius: 6px;
+  padding: 1rem 1.5rem;
+}
+
+.breadcrumb-item a {
+  color: var(--yandex-gray);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb-item a:hover {
+  color: var(--yandex-black);
+}
+
+.breadcrumb-item.active {
+  color: var(--yandex-black);
+  font-weight: 500;
+}
+
+/* Form стили */
+.form-control {
+  border: 1px solid var(--yandex-border);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.form-control:focus {
+  border-color: var(--yandex-yellow);
+  box-shadow: 0 0 0 3px rgba(252, 224, 0, 0.1);
+}
+
+.form-label {
+  color: var(--yandex-black);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+/* Фильтры */
+.bg-light {
+  background-color: #ffffff !important;
+  border: 1px solid var(--yandex-border);
+  border-radius: 8px;
+}
+
+/* Alert стили */
+.alert-warning {
+  background-color: var(--yandex-yellow-light);
+  border-color: var(--yandex-yellow);
+  color: var(--yandex-black);
+}
+
+.alert-info {
+  background-color: #f0f8ff;
+  border-color: #b3d9ff;
+  color: var(--yandex-black);
+}
+
+/* Pagination стили */
+.pagination .page-link {
+  color: var(--yandex-black);
+  background-color: #ffffff;
+  border: 1px solid var(--yandex-border);
+  margin: 0 2px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.pagination .page-link:hover {
+  background-color: var(--yandex-yellow-light);
+  border-color: var(--yandex-yellow);
+  color: var(--yandex-black);
+}
+
+.pagination .page-item.active .page-link {
+  background-color: var(--yandex-yellow);
+  border-color: var(--yandex-yellow);
+  color: var(--yandex-black);
+  font-weight: 500;
+}
+
+/* Spinner стили */
+.spinner-border {
+  color: var(--yandex-yellow);
+}
+
+/* Footer стили */
+.bg-dark {
+  background-color: #ffffff !important;
+  border-top: 1px solid var(--yandex-border);
+  color: var(--yandex-gray) !important;
+}
+
+.bg-dark p {
+  color: var(--yandex-gray) !important;
+}
+
+/* Анимации */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+/* Дефолтное изображение газа */
+.gas-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px 8px 0 0;
+}
+
+/* Карточка газа специфичные стили */
+.card.h-100 {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.card.h-100 .card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.card.h-100 .card-body .flex-grow-1 {
+  flex: 1;
+}
+
+/* Текст стили */
+.text-primary {
+  color: var(--yandex-black) !important;
+}
+
+.text-muted {
+  color: var(--yandex-gray-light) !important;
+}
+
+.lead {
+  color: var(--yandex-gray);
+}
+
+/* Card для главной страницы */
+.bg-primary {
+  background-color: var(--yandex-yellow) !important;
+  border: none;
+}
+
+.bg-primary .text-white {
+  color: var(--yandex-black) !important;
+}
+
+/* Кнопки размеры */
+.btn-lg {
+  padding: 0.75rem 2rem;
+  font-size: 1.1rem;
+  border-radius: 6px;
+}
+
+/* Hover эффекты */
+.shadow-sm:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.shadow:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Gap для flex элементов */
+.gap-2 {
+  gap: 0.5rem;
+}
+
+/* Container стили */
+.container {
+  max-width: 1200px;
+}
+
+/* Responsive стили */
+@media (max-width: 768px) {
+  .btn-primary {
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
+  }
+
+  .card {
+    margin-bottom: 1rem;
+  }
+}

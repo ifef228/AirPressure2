@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AtmosphericTempCalc - Детальная страница газа</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(-1rem);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fade-in 0.6s ease-out forwards;
+        }
+
+        /* Яндекс Маркет стили */
+        .gas_page {
+            background-color: #f8f8f8;
+            min-height: 100vh;
+        }
+
+        .gas_card {
+            background: #ffffff;
+            border: 1px solid #e6e6e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s ease;
+        }
+
+        .gas_card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .gas_btn {
+            background: #FCE000;
+            color: #000000;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            min-height: 50px;
+        }
+
+        .gas_btn:hover {
+            background: #E6CA00;
+            transform: translateY(-1px);
+        }
+
+        .gas_btn_secondary {
+            background: #ffffff;
+            color: #FCE000;
+            border: 1px solid #FCE000;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .gas_btn_secondary:hover {
+            background: #FFFDF0;
+        }
+
+        .gas_header {
+            background: #ffffff;
+            border-bottom: 1px solid #e6e6e6;
+        }
+
+        .gas_search {
+            background: #ffffff;
+            border: 1px solid #e6e6e6;
+            border-radius: 6px;
+        }
+
+        .gas_search:focus {
+            border-color: #FCE000;
+            box-shadow: 0 0 0 2px rgba(252, 224, 0, 0.1);
+        }
+
+        .gas_text_primary {
+            color: #000000;
+        }
+
+        .gas_text_secondary {
+            color: #666666;
+        }
+
+        .gas_text_muted {
+            color: #999999;
+        }
+
+        /* Фиксированные размеры для картинок */
+        .gas-detail-image {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        /* Логотип в хедере */
+        .header-logo {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="gas_page">
+        <!-- Header -->
+        <header class="gas_header w-full h-[164px] translate-y-[-1rem] animate-fade-in opacity-0">
+            <div class="container mx-auto px-8 py-8 flex items-center gap-4">
+                <button class="gas_btn_secondary w-[65px] h-[65px] rounded-lg shadow-md flex items-center justify-center">
+                    <span class="text-2xl">🏠</span>
+                </button>
+                <h1 class="text-4xl font-bold gas_text_primary tracking-[-0.70px] font-['Inter',Helvetica]">
+                    AtmosphericTempCalc
+                </h1>
+                <img
+                    class="header-logo"
+                    alt="AtmosphereTemp Logo"
+                    src="https://c.animaapp.com/mfi4rqisUqRMxb/img/image-4.png"
+                />
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="w-full py-8">
+            <div class="container mx-auto px-8 max-w-6xl">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Left Column - Image and Basic Info -->
+                    <div class="space-y-6">
+                        <div class="gas_card">
+                            <div class="p-8">
+                                <div class="text-center">
+                                    <img
+                                        class="gas-detail-image mx-auto mb-6"
+                                        alt="CO₂ (Углекислый газ)"
+                                        src="https://c.animaapp.com/mfi4rqisUqRMxb/img/image-5.png"
+                                    />
+                                    <h2 class="text-3xl font-bold gas_text_primary mb-2">
+                                        CO₂ (Углекислый газ)
+                                    </h2>
+                                    <p class="text-lg gas_text_secondary mb-4">
+                                        Диоксид углерода
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column - Detailed Information -->
+                    <div class="space-y-6">
+                        <!-- Description -->
+                        <div class="gas_card">
+                            <div class="p-6">
+                                <h3 class="text-xl font-semibold gas_text_primary mb-4">
+                                    Описание
+                                </h3>
+                                <p class="gas_text_secondary leading-relaxed">
+                                    Углекислый газ - это бесцветный газ без запаха, который является важной частью углеродного цикла Земли. Он играет ключевую роль в парниковом эффекте и является основным продуктом сгорания органических веществ.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Properties -->
+                        <div class="gas_card">
+                            <div class="p-6">
+                                <h3 class="text-xl font-semibold gas_text_primary mb-4">
+                                    Физические свойства
+                                </h3>
+                                <ul class="space-y-2">
+                                    <li class="gas_text_secondary flex items-start">
+                                        <span class="text-[#dff0a5] mr-2">•</span>
+                                        Молекулярная формула: CO₂
+                                    </li>
+                                    <li class="gas_text_secondary flex items-start">
+                                        <span class="text-[#dff0a5] mr-2">•</span>
+                                        Растворимость в воде: высокая
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Applications -->
+                        <div class="gas_card">
+                            <div class="p-6">
+                                <h3 class="text-xl font-semibold gas_text_primary mb-4">
+                                    Применение
+                                </h3>
+                                <ul class="space-y-2">
+                                    <li class="gas_text_secondary flex items-start">
+                                        <span class="text-[#dff0a5] mr-2">•</span>
+                                        Пищевая промышленность (газированные напитки)
+                                    </li>
+                                    <li class="gas_text_secondary flex items-start">
+                                        <span class="text-[#dff0a5] mr-2">•</span>
+                                        Огнетушители
+                                    </li>
+                                    <li class="gas_text_secondary flex items-start">
+                                        <span class="text-[#dff0a5] mr-2">•</span>
+                                        Сварочные работы
+                                    </li>
+                                    <li class="gas_text_secondary flex items-start">
+                                        <span class="text-[#dff0a5] mr-2">•</span>
+                                        Холодильная техника
+                                    </li>
+                                    <li class="gas_text_secondary flex items-start">
+                                        <span class="text-[#dff0a5] mr-2">•</span>
+                                        Сельское хозяйство (парниковый эффект)
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Atmospheric Data -->
+                        <div class="gas_card">
+                            <div class="p-6">
+                                <h3 class="text-xl font-semibold gas_text_primary mb-4">
+                                    Атмосферные данные
+                                </h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="bg-[#f8f8f8] rounded-lg p-4">
+                                        <div class="text-sm gas_text_muted mb-1">Концентрация</div>
+                                        <div class="text-lg font-semibold gas_text_primary">
+                                            0.04%
+                                        </div>
+                                    </div>
+                                    <div class="bg-[#f8f8f8] rounded-lg p-4">
+                                        <div class="text-sm gas_text_muted mb-1">Температура</div>
+                                        <div class="text-lg font-semibold gas_text_primary">
+                                            15°C
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Numerical Values -->
+                        <div class="gas_card">
+                            <div class="p-6">
+                                <h3 class="text-xl font-semibold gas_text_primary mb-4">
+                                    Физические характеристики
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div class="bg-[#f8f8f8] rounded-lg p-4">
+                                        <div class="text-sm gas_text_muted mb-1">Молярная масса</div>
+                                        <div class="text-lg font-semibold gas_text_primary">
+                                            44.01 <span class="text-sm gas_text_secondary">г/моль</span>
+                                        </div>
+                                    </div>
+                                    <div class="bg-[#f8f8f8] rounded-lg p-4">
+                                        <div class="text-sm gas_text_muted mb-1">Плотность</div>
+                                        <div class="text-lg font-semibold gas_text_primary">
+                                            1.977 <span class="text-sm gas_text_secondary">г/л</span>
+                                        </div>
+                                        <div class="text-xs gas_text_muted mt-1">при 0°C</div>
+                                    </div>
+                                    <div class="bg-[#f8f8f8] rounded-lg p-4">
+                                        <div class="text-sm gas_text_muted mb-1">Температура кипения</div>
+                                        <div class="text-lg font-semibold gas_text_primary">
+                                            -78.5 <span class="text-sm gas_text_secondary">°C</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Простая навигация для демонстрации
+        document.querySelector('button').addEventListener('click', function() {
+            alert('Возврат на главную страницу');
+        });
+    </script>
+</body>
+</html>

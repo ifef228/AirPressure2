@@ -1,0 +1,165 @@
+/* Адаптивные стили для всех устройств */
+
+/* ===== NAVBAR АДАПТИВНОСТЬ ===== */
+/* Бургер-меню уже встроено в Bootstrap, но добавим дополнительные стили */
+
+@media (max-width: 991px) {
+  .navbar-brand {
+    font-size: 1.2rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .navbar-brand {
+    font-size: 1rem !important;
+  }
+}
+
+/* ===== HOME PAGE АДАПТИВНОСТЬ ===== */
+@media (max-width: 768px) {
+  .display-3 {
+    font-size: 2.5rem !important;
+  }
+
+  .lead {
+    font-size: 1rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .display-3 {
+    font-size: 2rem !important;
+  }
+
+  .lead {
+    font-size: 0.95rem !important;
+  }
+
+  /* Карточки на Home на всю ширину на мобильных */
+  .home-info-card {
+    margin-bottom: 1rem;
+  }
+}
+
+/* ===== GASES LIST АДАПТИВНОСТЬ ===== */
+/* Сетка: 3 колонки на десктопе, 2 на планшете, 1 на мобильных */
+@media (min-width: 992px) {
+  /* 3 колонки на больших экранах (lg) */
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  /* 2 колонки на планшетах (md) */
+}
+
+@media (max-width: 767px) {
+  /* 1 колонка на мобильных (xs) */
+}
+
+@media (max-width: 767px) {
+  /* Фильтры - на мобильных в колонку */
+  .filters-row .col-md-4 {
+    margin-bottom: 0.5rem;
+  }
+
+  /* Кнопки фильтров на всю ширину */
+  .filter-buttons {
+    flex-direction: column !important;
+  }
+
+  .filter-buttons .btn {
+    width: 100% !important;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* ===== GAS DETAIL АДАПТИВНОСТЬ ===== */
+@media (max-width: 768px) {
+  .gas-detail-image {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  .gas-detail-title {
+    font-size: 1.8rem !important;
+  }
+
+  .gas-detail-properties {
+    font-size: 0.9rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .gas-detail-title {
+    font-size: 1.5rem !important;
+  }
+
+  .gas-detail-properties {
+    font-size: 0.85rem !important;
+  }
+
+  /* Кнопка "Назад" на всю ширину */
+  .back-button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* ===== PAGINATION АДАПТИВНОСТЬ ===== */
+@media (max-width: 576px) {
+  .pagination {
+    font-size: 0.85rem;
+  }
+
+  .pagination .page-link {
+    padding: 0.4rem 0.6rem;
+  }
+}
+
+/* ===== ОБЩИЕ АДАПТИВНЫЕ СТИЛИ ===== */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  h1 {
+    font-size: 1.8rem !important;
+  }
+
+  h2 {
+    font-size: 1.5rem !important;
+  }
+
+  h3 {
+    font-size: 1.3rem !important;
+  }
+
+  h5 {
+    font-size: 1.1rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  h1 {
+    font-size: 1.5rem !important;
+  }
+
+  h2 {
+    font-size: 1.3rem !important;
+  }
+
+  h3 {
+    font-size: 1.2rem !important;
+  }
+
+  .card-body {
+    padding: 1rem !important;
+  }
+}
+
+/* ===== FOOTER АДАПТИВНОСТЬ ===== */
+@media (max-width: 576px) {
+  footer p {
+    font-size: 0.85rem !important;
+  }
+}

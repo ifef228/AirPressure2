@@ -1,0 +1,1028 @@
+{
+	"info": {
+		"_postman_id": "gas-api-collection-v2",
+		"name": "Gas Temperature Calculator API",
+		"description": "Коллекция API запросов для системы расчета температуры газов с JWT аутентификацией",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "1. Аутентификация",
+			"item": [
+				{
+					"name": "Регистрация пользователя",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    console.log('Пользователь успешно зарегистрирован');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"login\": \"testuser\",\n    \"password\": \"password123\",\n    \"email\": \"test@example.com\",\n    \"firstName\": \"Test\",\n    \"lastName\": \"User\",\n    \"role\": \"USER\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Вход (Login) - Получить JWT токен",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.success && jsonData.data && jsonData.data.token) {",
+									"        pm.environment.set('jwt_token', jsonData.data.token);",
+									"        pm.environment.set('user_id', jsonData.data.user.id);",
+									"        console.log('JWT токен сохранен:', jsonData.data.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"login\": \"testuser\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Регистрация модератора",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    console.log('Модератор успешно зарегистрирован');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"login\": \"moderator\",\n    \"password\": \"moderator123\",\n    \"email\": \"moderator@example.com\",\n    \"firstName\": \"Moderator\",\n    \"lastName\": \"User\",\n    \"role\": \"MODERATOR\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Вход модератора",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.success && jsonData.data && jsonData.data.token) {",
+									"        pm.environment.set('moderator_jwt_token', jsonData.data.token);",
+									"        console.log('JWT токен модератора сохранен');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"login\": \"moderator\",\n    \"password\": \"moderator123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Выход (Logout) - Добавить токен в blacklist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    console.log('Успешный выход из системы. Токен добавлен в blacklist.');",
+									"    pm.environment.unset('jwt_token');",
+									"    console.log('JWT токен удален из окружения');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/logout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "logout"]
+						},
+						"description": "Деавторизация пользователя. Токен добавляется в Redis blacklist и становится недействительным."
+					},
+					"response": []
+				},
+				{
+					"name": "Попытка использовать токен после logout (должна быть ошибка 401)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 401) {",
+									"    console.log('✓ Токен успешно заблокирован. Доступ запрещен.');",
+									"} else {",
+									"    console.log('⚠ Неожиданный код ответа:', pm.response.code);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "profile"]
+						},
+						"description": "Этот запрос должен вернуть ошибку 401, так как токен находится в blacklist после logout."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Заявки (Orders)",
+			"item": [
+				{
+					"name": "GET список заявок (с фильтром по дате и статусу)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/gas-orders?status=FORMED&formedDateFrom=2024-01-01T00:00:00&formedDateTo=2024-12-31T23:59:59&page=0&size=20",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gas-orders"],
+							"query": [
+								{
+									"key": "status",
+									"value": "FORMED",
+									"description": "Статус заявки: DRAFT, FORMED, COMPLETED, CANCELLED"
+								},
+								{
+									"key": "formedDateFrom",
+									"value": "2024-01-01T00:00:00",
+									"description": "Дата формирования от (ISO 8601)"
+								},
+								{
+									"key": "formedDateTo",
+									"value": "2024-12-31T23:59:59",
+									"description": "Дата формирования до (ISO 8601)"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET иконка корзины",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/gas-orders/cart-icon",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gas-orders", "cart-icon"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET заявка по ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.success && jsonData.data) {",
+									"        pm.environment.set('order_id', jsonData.data.id);",
+									"        console.log('ID заявки сохранен:', jsonData.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/gas-orders/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gas-orders", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order_id}}",
+									"description": "ID заявки"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE заявка (если есть)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/gas-orders/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gas-orders", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order_id}}",
+									"description": "ID заявки для удаления"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Услуги (Gases)",
+			"item": [
+				{
+					"name": "GET список услуг (с фильтром)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.success && jsonData.data && jsonData.data.items.length > 0) {",
+									"        pm.environment.set('gas_id_1', jsonData.data.items[0].id);",
+									"        if (jsonData.data.items.length > 1) {",
+									"            pm.environment.set('gas_id_2', jsonData.data.items[1].id);",
+									"        }",
+									"        console.log('ID услуг сохранены');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/gases?name=&formula=&page=0&size=20",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gases"],
+							"query": [
+								{
+									"key": "name",
+									"value": "",
+									"description": "Фильтр по названию"
+								},
+								{
+									"key": "formula",
+									"value": "",
+									"description": "Фильтр по формуле"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET услуга по ID",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/gases/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gases", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{gas_id_1}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST добавить новую услугу",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.success && jsonData.data) {",
+									"        pm.environment.set('new_gas_id', jsonData.data.id);",
+									"        console.log('ID новой услуги сохранен:', jsonData.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Азот\",\n    \"formula\": \"N2\",\n    \"detailedDescription\": \"Диазот - двухатомный газ без цвета, вкуса и запаха\",\n    \"imageUrl\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/gases",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gases"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST добавить картинку к услуге",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"imageUrl\": \"https://example.com/images/nitrogen.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/gases/:id/image",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gases", ":id", "image"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{new_gas_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Работа с заявкой",
+			"item": [
+				{
+					"name": "POST добавить услугу в заявку",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    console.log('Услуга добавлена в заявку');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"gasId\": {{gas_id_1}},\n    \"concentration\": 78.08,\n    \"temperature\": 20.0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/gas-orders/:id/gases",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gas-orders", ":id", "gases"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order_id}}",
+									"description": "ID активной заявки (корзины)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST добавить другую услугу в заявку",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"gasId\": {{gas_id_2}},\n    \"concentration\": 20.95,\n    \"temperature\": 25.0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/gas-orders/:id/gases",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gas-orders", ":id", "gases"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET иконка корзины (после добавления услуг)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/gas-orders/cart-icon",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gas-orders", "cart-icon"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET заявка (посмотреть заявку из 2 услуг)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/gas-orders/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gas-orders", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT изменить поле услуги (концентрация/температура)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"concentration\": 80.0,\n    \"temperature\": 22.5\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/gas-orders/:orderId/gases/:gasId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gas-orders", ":orderId", "gases", ":gasId"],
+							"variable": [
+								{
+									"key": "orderId",
+									"value": "{{order_id}}"
+								},
+								{
+									"key": "gasId",
+									"value": "{{gas_id_1}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT изменить заявку (описание)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Заявка на расчет температуры атмосферы\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/gas-orders/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gas-orders", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT завершить черновик заявки (должна быть ошибка)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"APPROVE\",\n    \"comment\": \"Одобрено\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/gas-orders/:id/complete",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gas-orders", ":id", "complete"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order_id}}",
+									"description": "ID черновика заявки (должна быть ошибка 403)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT сформировать заявку",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    console.log('Заявка успешно сформирована');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/gas-orders/:id/form",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gas-orders", ":id", "form"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT завершить сформированную заявку (модератором)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.success && jsonData.data) {",
+									"        console.log('Температура рассчитана:', jsonData.data.tempResult);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{moderator_jwt_token}}",
+								"type": "text",
+								"description": "Токен модератора"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"APPROVE\",\n    \"comment\": \"Заявка одобрена. Температура рассчитана автоматически.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/gas-orders/:id/complete",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gas-orders", ":id", "complete"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order_id}}",
+									"description": "ID сформированной заявки"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET рассчитать температуру заявки",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/gas-orders/:id/calculate-temperature",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gas-orders", ":id", "calculate-temperature"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET услуга в заявке",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/gas-orders/:orderId/gases/:gasId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gas-orders", ":orderId", "gases", ":gasId"],
+							"variable": [
+								{
+									"key": "orderId",
+									"value": "{{order_id}}"
+								},
+								{
+									"key": "gasId",
+									"value": "{{gas_id_1}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE удалить услугу из заявки",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/gas-orders/:orderId/gases/:gasId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gas-orders", ":orderId", "gases", ":gasId"],
+							"variable": [
+								{
+									"key": "orderId",
+									"value": "{{order_id}}"
+								},
+								{
+									"key": "gasId",
+									"value": "{{gas_id_2}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Профиль пользователя",
+			"item": [
+				{
+					"name": "GET профиль пользователя",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "profile"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT обновить профиль",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"newemail@example.com\",\n    \"firstName\": \"Updated\",\n    \"lastName\": \"Name\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "profile"]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "moderator_jwt_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "order_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "gas_id_1",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "gas_id_2",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "new_gas_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

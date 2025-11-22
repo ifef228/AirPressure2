@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: admin    # Логин для доступа
+      MINIO_ROOT_PASSWORD: password  # Пароль для доступа (смените на свой!)
+    ports:
+      - "9000:9000"  # API порт (для клиентов)
+      - "9001:9001"  # Web UI порт (браузер)
+    volumes:
+      - minio_data:/data             # Монтируем том для данных
+    command: server /data --console-address ":9001"  # Запускаем сервер с веб-интерфейсом на порту 9001
+  postgres:
+    image: postgres:15  # Можно указать нужную версию: 16, 15, 14 и т.д.
+    container_name: my_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: my_database       # Имя базы данных по умолчанию
+      POSTGRES_USER: my_user         # Пользователь по умолчанию
+      POSTGRES_PASSWORD: my_password # Пароль (ОБЯЗАТЕЛЬНО измените!)
+    ports:
+      - "5432:5432"  # Проброс порта: host:container
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Важно! Том для данных
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U my_user -d my_database"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer:4.8.1
+    container_name: adminer
+    restart: unless-stopped
+    ports:
+      - "8081:8080"  # Adminer будет доступен на порту 8081
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres  # Имя сервиса PostgreSQL
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+
+volumes:
+  minio_data:  # Именованный том Docker для хранения данных (управляется Docker'ом)
+  postgres_data:  # Именованный том Docker для хранения данных (управляется Docker'ом)
+  redis_data:  # Именованный том Docker для хранения данных Redis
