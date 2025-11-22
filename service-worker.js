@@ -77,8 +77,12 @@ self.addEventListener('fetch', (event) => {
   // Перехватываем запросы к /api для перенаправления на бэкенд по IP
   // Это нужно для GitHub Pages, которые работают по HTTPS, но бэкенд может быть на HTTP в локальной сети
   // Также обрабатываем запросы с base path /airPressure/api
+  // И запросы к ifef228.github.io/api (без base path, если они случайно пошли)
   const isApiRequest = url.pathname.startsWith('/api') ||
-                       url.pathname.startsWith('/airPressure/api');
+                       url.pathname.startsWith('/airPressure/api') ||
+                       (url.hostname.includes('github.io') && url.pathname.includes('/api'));
+
+  console.log('[Service Worker] Запрос:', url.href, 'isApiRequest:', isApiRequest, 'BACKEND_IP:', BACKEND_IP);
 
   if (isApiRequest && BACKEND_IP) {
     const protocol = USE_HTTPS ? 'https' : 'http';
@@ -86,15 +90,25 @@ self.addEventListener('fetch', (event) => {
 
     // Убираем base path если есть и нормализуем путь
     let apiPath = url.pathname;
+
+    // Убираем /airPressure если есть
     if (apiPath.startsWith('/airPressure/api')) {
       apiPath = apiPath.replace('/airPressure', '');
     } else if (apiPath.startsWith('/airPressure')) {
       apiPath = apiPath.replace('/airPressure', '');
     }
 
-    // Убеждаемся, что путь начинается с /api
+    // Если путь не начинается с /api, добавляем его
+    // Это для случаев, когда запрос идет на /api напрямую
     if (!apiPath.startsWith('/api')) {
-      apiPath = '/api' + apiPath;
+      // Если путь содержит /api, извлекаем часть после /api
+      const apiIndex = apiPath.indexOf('/api');
+      if (apiIndex !== -1) {
+        apiPath = apiPath.substring(apiIndex);
+      } else {
+        // Если /api нет, добавляем его
+        apiPath = '/api' + (apiPath.startsWith('/') ? '' : '/') + apiPath;
+      }
     }
 
     const backendUrl = `${protocol}://${BACKEND_IP}:${port}${apiPath}${url.search}`;
