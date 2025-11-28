@@ -61,7 +61,8 @@ self.addEventListener('activate', (event) => {
 
 // Конфигурация API для перехвата запросов (для GitHub Pages)
 // Установите BACKEND_URL через сообщение от клиента или используйте значение по умолчанию
-let BACKEND_URL = 'https://192.168.1.13:8080';
+// Используем HTTP для локальной сети (не HTTPS)
+let BACKEND_URL = 'http://192.168.1.13:8080';
 
 // Перехват сетевых запросов
 self.addEventListener('fetch', (event) => {
@@ -72,12 +73,32 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
+  // В development режиме (localhost) не перехватываем запросы вообще
+  // Service Worker нужен только для production (GitHub Pages)
+  const isLocalhost = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+  const isLocalhostBackend = url.hostname === 'localhost' && url.port === '8080';
+  const isLocalhostDev = isLocalhost && (url.port === '5173' || url.port === '3000' || !url.port);
+
+  // Пропускаем все запросы в development режиме (localhost:5173, localhost:3000 и т.д.)
+  // Это позволяет использовать прокси Vite без вмешательства service worker
+  if (isLocalhostDev || isLocalhostBackend) {
+    console.log('[Service Worker] Пропускаем запрос в development:', url.href);
+    return;
+  }
+
+  // Также пропускаем запросы к /AirPressure2/api на localhost:5173 (прокси Vite)
+  if (isLocalhost && url.port === '5173' && url.pathname.startsWith('/AirPressure2/api')) {
+    console.log('[Service Worker] Пропускаем запрос к прокси Vite:', url.href);
+    return;
+  }
+
   // Перехватываем запросы к /api для перенаправления на бэкенд
-  // Это нужно для GitHub Pages, которые работают по HTTPS
-  // Обрабатываем запросы с base path /AirPressure2/api и без него
-  const isApiRequest = url.pathname.startsWith('/api') ||
-                       url.pathname.startsWith('/AirPressure2/api') ||
-                       (url.hostname.includes('github.io') && url.pathname.includes('/api'));
+  // Это нужно только для production (GitHub Pages)
+  const isApiRequest = (
+    url.pathname.startsWith('/api') ||
+    url.pathname.startsWith('/AirPressure2/api') ||
+    (url.hostname.includes('github.io') && url.pathname.includes('/api'))
+  );
 
   console.log('[Service Worker] Запрос:', url.href, 'isApiRequest:', isApiRequest, 'BACKEND_URL:', BACKEND_URL);
 

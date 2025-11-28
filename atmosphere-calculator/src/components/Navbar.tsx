@@ -1,12 +1,20 @@
 import { FC, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Navbar as BSNavbar, Container, Nav } from 'react-bootstrap';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Navbar as BSNavbar, Container, Nav, Button } from 'react-bootstrap';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { logout } from '../store/authSlice';
+import { clearDraft } from '../store/draftSlice';
+import { resetFilters } from '../store/filtersSlice';
 
 // Типы цветов светофора
 type TrafficLightColor = 'red' | 'yellow' | 'green';
 
 const Navbar: FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const { draftOrder } = useAppSelector((state) => state.orders);
 
   // useState для мини-игры Светофор
   const [trafficLight, setTrafficLight] = useState<TrafficLightColor>('red');
@@ -32,6 +40,21 @@ const Navbar: FC = () => {
     red: '#dc3545',
     yellow: '#ffc107',
     green: '#28a745',
+  };
+
+  // Обработчик выхода
+  const handleLogout = () => {
+    dispatch(logout());
+    dispatch(clearDraft());
+    dispatch(resetFilters());
+    navigate('/');
+  };
+
+  // Обработчик перехода к заявке
+  const handleOrderClick = () => {
+    if (draftOrder) {
+      navigate(`/orders/${draftOrder.id}`);
+    }
   };
 
   return (
@@ -119,7 +142,7 @@ const Navbar: FC = () => {
         <BSNavbar.Toggle aria-controls="basic-navbar-nav" className="navbar-toggler-custom" />
 
         <BSNavbar.Collapse id="basic-navbar-nav">
-          <Nav className="ms-auto">
+          <Nav className="ms-auto align-items-center">
             <Nav.Link
               as={Link}
               to="/"
@@ -136,6 +159,60 @@ const Navbar: FC = () => {
             >
               Услуги (Газы)
             </Nav.Link>
+
+            {isAuthenticated ? (
+              <>
+                <Nav.Link
+                  as={Link}
+                  to="/orders"
+                  active={location.pathname === '/orders'}
+                  className="nav-link-responsive"
+                >
+                  Мои заявки
+                </Nav.Link>
+                <Nav.Link
+                  as={Link}
+                  to="/profile"
+                  active={location.pathname === '/profile'}
+                  className="nav-link-responsive"
+                >
+                  Профиль
+                </Nav.Link>
+                {draftOrder && (
+                  <Button
+                    variant="warning"
+                    size="sm"
+                    onClick={handleOrderClick}
+                    className="ms-2"
+                    style={{ backgroundColor: '#FCE000', color: '#000', border: 'none', fontWeight: '600' }}
+                  >
+                    Заявка ({draftOrder.id})
+                  </Button>
+                )}
+                <Nav.Link className="nav-link-responsive">
+                  <span style={{ color: '#000', fontWeight: '600' }}>
+                    {user?.login || 'Пользователь'}
+                  </span>
+                </Nav.Link>
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="ms-2"
+                >
+                  Выход
+                </Button>
+              </>
+            ) : (
+              <Nav.Link
+                as={Link}
+                to="/login"
+                active={location.pathname === '/login'}
+                className="nav-link-responsive"
+              >
+                Вход
+              </Nav.Link>
+            )}
           </Nav>
         </BSNavbar.Collapse>
       </Container>

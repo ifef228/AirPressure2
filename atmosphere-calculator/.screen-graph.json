@@ -21,9 +21,83 @@
       "routes": [
         "/gases/:id"
       ]
+    },
+    {
+      "id": "src/pages/Login.tsx",
+      "label": "Login",
+      "routes": [
+        "/login"
+      ]
+    },
+    {
+      "id": "src/pages/Register.tsx",
+      "label": "Register",
+      "routes": [
+        "/register"
+      ]
+    },
+    {
+      "id": "src/pages/OrdersList.tsx",
+      "label": "OrdersList",
+      "routes": [
+        "/orders"
+      ]
+    },
+    {
+      "id": "src/pages/OrderDetail.tsx",
+      "label": "OrderDetail",
+      "routes": [
+        "/orders/:id"
+      ]
+    },
+    {
+      "id": "src/pages/Profile.tsx",
+      "label": "Profile",
+      "routes": [
+        "/profile"
+      ]
+    },
+    {
+      "id": "src/pages/Cart.tsx",
+      "label": "Cart",
+      "routes": [
+        "/cart"
+      ]
     }
   ],
   "edges": [
+    {
+      "id": "src/components/GasCard.tsx:32:6-to-src/pages/Login.tsx",
+      "source": "src/pages/GasesList.tsx",
+      "target": "src/pages/Login.tsx",
+      "data": {
+        "viaRoute": "/login",
+        "trigger": {
+          "element": "navigate('/login')",
+          "line": 32,
+          "endLine": 32,
+          "column": 6,
+          "endColumn": 24,
+          "sourceFile": "src/components/GasCard.tsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/GasCard.tsx:47:6-to-src/pages/Login.tsx",
+      "source": "src/pages/GasesList.tsx",
+      "target": "src/pages/Login.tsx",
+      "data": {
+        "viaRoute": "/login",
+        "trigger": {
+          "element": "navigate('/login')",
+          "line": 47,
+          "endLine": 47,
+          "column": 6,
+          "endColumn": 24,
+          "sourceFile": "src/components/GasCard.tsx"
+        }
+      }
+    },
     {
       "id": "src/pages/GasDetail.tsx:77:14-to-src/pages/GasesList.tsx",
       "source": "src/pages/GasDetail.tsx",
@@ -37,6 +111,246 @@
           "column": 14,
           "endColumn": 23,
           "sourceFile": "src/pages/GasDetail.tsx"
+        }
+      }
+    },
+    {
+      "id": "src/pages/Login.tsx:19:6-to-src/pages/Home.tsx",
+      "source": "src/pages/Login.tsx",
+      "target": "src/pages/Home.tsx",
+      "data": {
+        "viaRoute": "/",
+        "trigger": {
+          "element": "navigate('/')",
+          "line": 19,
+          "endLine": 19,
+          "column": 6,
+          "endColumn": 19,
+          "sourceFile": "src/pages/Login.tsx"
+        }
+      }
+    },
+    {
+      "id": "src/pages/Login.tsx:103:16-to-src/pages/Register.tsx",
+      "source": "src/pages/Login.tsx",
+      "target": "src/pages/Register.tsx",
+      "data": {
+        "viaRoute": "/register",
+        "trigger": {
+          "element": "<Link to=\"/register\" style={{ color: '#FCE000', textDecoration: 'none', fontWeight: '600' }}>\n                  Зарегистрироваться\n                </Link>",
+          "line": 103,
+          "endLine": 105,
+          "column": 16,
+          "endColumn": 23,
+          "sourceFile": "src/pages/Login.tsx"
+        }
+      }
+    },
+    {
+      "id": "src/pages/Register.tsx:23:6-to-src/pages/Home.tsx",
+      "source": "src/pages/Register.tsx",
+      "target": "src/pages/Home.tsx",
+      "data": {
+        "viaRoute": "/",
+        "trigger": {
+          "element": "navigate('/')",
+          "line": 23,
+          "endLine": 23,
+          "column": 6,
+          "endColumn": 19,
+          "sourceFile": "src/pages/Register.tsx"
+        }
+      }
+    },
+    {
+      "id": "src/pages/Register.tsx:152:16-to-src/pages/Login.tsx",
+      "source": "src/pages/Register.tsx",
+      "target": "src/pages/Login.tsx",
+      "data": {
+        "viaRoute": "/login",
+        "trigger": {
+          "element": "<Link to=\"/login\" style={{ color: '#FCE000', textDecoration: 'none', fontWeight: '600' }}>\n                  Войти\n                </Link>",
+          "line": 152,
+          "endLine": 154,
+          "column": 16,
+          "endColumn": 23,
+          "sourceFile": "src/pages/Register.tsx"
+        }
+      }
+    },
+    {
+      "id": "src/pages/OrdersList.tsx:16:6-to-src/pages/Login.tsx",
+      "source": "src/pages/OrdersList.tsx",
+      "target": "src/pages/Login.tsx",
+      "data": {
+        "viaRoute": "/login",
+        "trigger": {
+          "element": "navigate('/login')",
+          "line": 16,
+          "endLine": 16,
+          "column": 6,
+          "endColumn": 24,
+          "sourceFile": "src/pages/OrdersList.tsx"
+        }
+      }
+    },
+    {
+      "id": "src/pages/OrderDetail.tsx:24:6-to-src/pages/Login.tsx",
+      "source": "src/pages/OrderDetail.tsx",
+      "target": "src/pages/Login.tsx",
+      "data": {
+        "viaRoute": "/login",
+        "trigger": {
+          "element": "navigate('/login')",
+          "line": 24,
+          "endLine": 24,
+          "column": 6,
+          "endColumn": 24,
+          "sourceFile": "src/pages/OrderDetail.tsx"
+        }
+      }
+    },
+    {
+      "id": "src/pages/OrderDetail.tsx:69:6-to-src/pages/OrdersList.tsx",
+      "source": "src/pages/OrderDetail.tsx",
+      "target": "src/pages/OrdersList.tsx",
+      "data": {
+        "viaRoute": "/orders",
+        "trigger": {
+          "element": "navigate('/orders')",
+          "line": 69,
+          "endLine": 69,
+          "column": 6,
+          "endColumn": 25,
+          "sourceFile": "src/pages/OrderDetail.tsx"
+        }
+      }
+    },
+    {
+      "id": "src/pages/OrderDetail.tsx:168:35-to-src/pages/OrdersList.tsx",
+      "source": "src/pages/OrderDetail.tsx",
+      "target": "src/pages/OrdersList.tsx",
+      "data": {
+        "viaRoute": "/orders",
+        "trigger": {
+          "element": "navigate('/orders')",
+          "line": 168,
+          "endLine": 168,
+          "column": 35,
+          "endColumn": 54,
+          "sourceFile": "src/pages/OrderDetail.tsx"
+        }
+      }
+    },
+    {
+      "id": "src/pages/OrderDetail.tsx:181:27-to-src/pages/OrdersList.tsx",
+      "source": "src/pages/OrderDetail.tsx",
+      "target": "src/pages/OrdersList.tsx",
+      "data": {
+        "viaRoute": "/orders",
+        "trigger": {
+          "element": "navigate('/orders')",
+          "line": 181,
+          "endLine": 181,
+          "column": 27,
+          "endColumn": 46,
+          "sourceFile": "src/pages/OrderDetail.tsx"
+        }
+      }
+    },
+    {
+      "id": "src/pages/Profile.tsx:23:6-to-src/pages/Login.tsx",
+      "source": "src/pages/Profile.tsx",
+      "target": "src/pages/Login.tsx",
+      "data": {
+        "viaRoute": "/login",
+        "trigger": {
+          "element": "navigate('/login')",
+          "line": 23,
+          "endLine": 23,
+          "column": 6,
+          "endColumn": 24,
+          "sourceFile": "src/pages/Profile.tsx"
+        }
+      }
+    },
+    {
+      "id": "src/pages/Cart.tsx:21:6-to-src/pages/Login.tsx",
+      "source": "src/pages/Cart.tsx",
+      "target": "src/pages/Login.tsx",
+      "data": {
+        "viaRoute": "/login",
+        "trigger": {
+          "element": "navigate('/login')",
+          "line": 21,
+          "endLine": 21,
+          "column": 6,
+          "endColumn": 24,
+          "sourceFile": "src/pages/Cart.tsx"
+        }
+      }
+    },
+    {
+      "id": "src/pages/Cart.tsx:152:6-to-src/pages/OrdersList.tsx",
+      "source": "src/pages/Cart.tsx",
+      "target": "src/pages/OrdersList.tsx",
+      "data": {
+        "viaRoute": "/orders",
+        "trigger": {
+          "element": "navigate('/orders')",
+          "line": 152,
+          "endLine": 152,
+          "column": 6,
+          "endColumn": 25,
+          "sourceFile": "src/pages/Cart.tsx"
+        }
+      }
+    },
+    {
+      "id": "src/pages/Cart.tsx:183:35-to-src/pages/GasesList.tsx",
+      "source": "src/pages/Cart.tsx",
+      "target": "src/pages/GasesList.tsx",
+      "data": {
+        "viaRoute": "/gases",
+        "trigger": {
+          "element": "navigate('/gases')",
+          "line": 183,
+          "endLine": 183,
+          "column": 35,
+          "endColumn": 53,
+          "sourceFile": "src/pages/Cart.tsx"
+        }
+      }
+    },
+    {
+      "id": "src/pages/Cart.tsx:205:31-to-src/pages/GasesList.tsx",
+      "source": "src/pages/Cart.tsx",
+      "target": "src/pages/GasesList.tsx",
+      "data": {
+        "viaRoute": "/gases",
+        "trigger": {
+          "element": "navigate('/gases')",
+          "line": 205,
+          "endLine": 205,
+          "column": 31,
+          "endColumn": 49,
+          "sourceFile": "src/pages/Cart.tsx"
+        }
+      }
+    },
+    {
+      "id": "src/pages/Cart.tsx:326:33-to-src/pages/GasesList.tsx",
+      "source": "src/pages/Cart.tsx",
+      "target": "src/pages/GasesList.tsx",
+      "data": {
+        "viaRoute": "/gases",
+        "trigger": {
+          "element": "navigate('/gases')",
+          "line": 326,
+          "endLine": 326,
+          "column": 33,
+          "endColumn": 51,
+          "sourceFile": "src/pages/Cart.tsx"
         }
       }
     }

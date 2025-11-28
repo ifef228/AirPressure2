@@ -1,14 +1,13 @@
 import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
+import { useAppSelector } from '../store/hooks';
 
 const FloatingCart: FC = () => {
   const navigate = useNavigate();
   const { getCartItemsCount } = useCart();
   const cartCount = getCartItemsCount();
-
-  // TODO: Замените на реальную логику авторизации
-  const isAuthenticated = false;
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   const handleCartClick = () => {
     if (cartCount > 0 && isAuthenticated) {
@@ -66,7 +65,7 @@ const FloatingCart: FC = () => {
   };
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative', display: 'inline-block' }}>
       {/* Корзина */}
       <div
         onClick={handleCartClick}
@@ -92,14 +91,13 @@ const FloatingCart: FC = () => {
         }
       >
         🛒
+        {/* Badge с количеством - внутри элемента корзины */}
+        {cartCount > 0 && (
+          <div style={badgeStyle}>
+            {cartCount}
+          </div>
+        )}
       </div>
-
-      {/* Badge с количеством */}
-      {cartCount > 0 && (
-        <div style={badgeStyle}>
-          {cartCount}
-        </div>
-      )}
 
       {/* CSS анимация pulse */}
       <style>{`

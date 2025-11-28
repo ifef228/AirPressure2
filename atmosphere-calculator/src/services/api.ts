@@ -1,17 +1,10 @@
 import { Gas, PaginatedResponse, ApiResponse, GasesFilter } from '../types';
 import { getMockGasesPaginated, getMockGasById } from '../data/mockGasesData';
 
-// Базовый URL API - используем относительный путь, Service Worker будет проксировать
-// Для GitHub Pages используем путь с base path
-const getBasePath = () => {
-  // В production на GitHub Pages это будет /AirPressure2
-  if (window.location.pathname.startsWith('/AirPressure2')) {
-    return '/AirPressure2';
-  }
-  return '';
-};
+// Базовый URL API - используем единый подход для всех окружений
+const API_BASE_URL = '/AirPressure2/api'; // Всегда используем прокси Vite
 
-const API_BASE_URL = `${getBasePath()}/api`;
+console.log('[Gases API] Base URL:', API_BASE_URL);
 
 // Флаг для определения доступности бэкенда
 let backendAvailable = true;
@@ -32,13 +25,25 @@ export const getGases = async (filters: GasesFilter = {}): Promise<PaginatedResp
 
     // Формируем URL
     const url = `${API_BASE_URL}/gases?${params.toString()}`;
+    console.log('[Gases API] Fetching URL:', url);
+    console.log('[Gases API] Full URL will be:', window.location.origin + url);
+
+    // Добавляем timeout для запроса (5 секунд)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
 
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
+
+    console.log('[Gases API] Response status:', response.status, response.statusText);
+    console.log('[Gases API] Response URL:', response.url);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -54,7 +59,12 @@ export const getGases = async (filters: GasesFilter = {}): Promise<PaginatedResp
     }
 
   } catch (error) {
-    console.warn('Backend unavailable, using mock data:', error);
+    // Если запрос был отменен из-за timeout или другая ошибка сети
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.warn('Request timeout, using mock data');
+    } else {
+      console.warn('Backend unavailable, using mock data:', error);
+    }
     backendAvailable = false;
 
     // Возвращаем mock данные
@@ -67,16 +77,23 @@ export const getGases = async (filters: GasesFilter = {}): Promise<PaginatedResp
  */
 export const getGasById = async (id: number): Promise<Gas | null> => {
   try {
-    // Формируем URL - API_BASE_URL уже содержит правильный путь с base path
+    // Формируем URL - API_BASE_URL уже содержит полный URL к бэкенду
     const url = `${API_BASE_URL}/gases/${id}`;
     console.log('Fetching gas by id:', url);
+
+    // Добавляем timeout для запроса (5 секунд)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
 
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -92,7 +109,12 @@ export const getGasById = async (id: number): Promise<Gas | null> => {
     }
 
   } catch (error) {
-    console.warn('Backend unavailable, using mock data:', error);
+    // Если запрос был отменен из-за timeout или другая ошибка сети
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.warn('Request timeout, using mock data');
+    } else {
+      console.warn('Backend unavailable, using mock data:', error);
+    }
     backendAvailable = false;
 
     // Возвращаем mock данные

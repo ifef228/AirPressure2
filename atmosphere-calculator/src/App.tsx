@@ -7,6 +7,12 @@ import FloatingCart from './components/FloatingCart';
 import Home from './pages/Home';
 import GasesList from './pages/GasesList';
 import GasDetail from './pages/GasDetail';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import OrdersList from './pages/OrdersList';
+import OrderDetail from './pages/OrderDetail';
+import Profile from './pages/Profile';
+import Cart from './pages/Cart';
 
 const App: FC = () => {
   // Всегда используем один basename - название репозитория
@@ -24,6 +30,12 @@ const App: FC = () => {
             <Route path="/" element={<Home />} />
             <Route path="/gases" element={<GasesList />} />
             <Route path="/gases/:id" element={<GasDetail />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/orders" element={<OrdersList />} />
+            <Route path="/orders/:id" element={<OrderDetail />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/cart" element={<Cart />} />
           </Routes>
         </main>
 
