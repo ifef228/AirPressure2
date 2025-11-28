@@ -61,7 +61,8 @@ self.addEventListener('activate', (event) => {
 
 // Конфигурация API для перехвата запросов (для GitHub Pages)
 // Установите BACKEND_URL через сообщение от клиента или используйте значение по умолчанию
-let BACKEND_URL = 'https://192.168.1.13:8080';
+// Используем HTTP для локальной сети (не HTTPS)
+let BACKEND_URL = 'http://192.168.1.13:8080';
 
 // Перехват сетевых запросов
 self.addEventListener('fetch', (event) => {
