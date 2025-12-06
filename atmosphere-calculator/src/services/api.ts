@@ -1,10 +1,6 @@
 import { Gas, PaginatedResponse, ApiResponse, GasesFilter } from '../types';
 import { getMockGasesPaginated, getMockGasById } from '../data/mockGasesData';
-
-// Базовый URL API - используем единый подход для всех окружений
-const API_BASE_URL = '/AirPressure2/api'; // Всегда используем прокси Vite
-
-console.log('[Gases API] Base URL:', API_BASE_URL);
+import { API_BASE_URL } from '../lib/apiConfig';
 
 // Флаг для определения доступности бэкенда
 let backendAvailable = true;

@@ -5,6 +5,85 @@ import { Provider } from 'react-redux';
 import { store } from './store/store';
 import App from './App';
 
+// Логирование для диагностики (только в dev режиме)
+if (import.meta.env.DEV) {
+  console.log('[Main] Starting application...');
+  console.log('[Main] Tauri detected:', !!(window as any).__TAURI__);
+  console.log('[Main] Window location:', window.location.href);
+  console.log('[Main] Document ready state:', document.readyState);
+  console.log('[Main] NODE_ENV:', import.meta.env.MODE);
+  console.log('[Main] VITE_TAURI:', import.meta.env.VITE_TAURI);
+}
+
+// Отключаем контекстное меню (Inspect Element) в Tauri приложении
+if ((window as any).__TAURI__) {
+  // Блокируем стандартное контекстное меню всегда
+  document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  }, true);
+
+  // Блокируем открытие DevTools через клавиатуру
+  document.addEventListener('keydown', (e) => {
+    // Разрешаем Cmd+R / Ctrl+R для перезагрузки
+    if ((e.metaKey || e.ctrlKey) && e.key === 'r' && !e.shiftKey && !e.altKey) {
+      return; // Разрешаем перезагрузку
+    }
+
+    // Блокируем все комбинации для открытия DevTools
+    // Cmd+Option+I / Ctrl+Shift+I (DevTools)
+    if ((e.metaKey || e.ctrlKey) && (e.altKey || e.shiftKey) && (e.key === 'I' || e.key === 'i')) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+
+    // Cmd+Option+J / Ctrl+Shift+J (Console)
+    if ((e.metaKey || e.ctrlKey) && (e.altKey || e.shiftKey) && (e.key === 'J' || e.key === 'j')) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+
+    // F12 (DevTools)
+    if (e.key === 'F12') {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+
+    // Ctrl+Shift+C / Cmd+Option+C (Inspect Element)
+    if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  }, true);
+
+  // Блокируем выделение текста через тройной клик (может открыть контекстное меню)
+  document.addEventListener('selectstart', (e) => {
+    // Разрешаем выделение текста в input/textarea
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+      return;
+    }
+    // Блокируем выделение в других местах
+    e.preventDefault();
+    return false;
+  }, true);
+
+  // Блокируем drag & drop (может использоваться для обхода)
+  document.addEventListener('dragstart', (e) => {
+    e.preventDefault();
+    return false;
+  }, true);
+
+  if (import.meta.env.DEV) {
+    console.log('[Main] Tauri: контекстное меню и DevTools заблокированы');
+  }
+}
+
 // Подключаем Bootstrap CSS
 import 'bootstrap/dist/css/bootstrap.min.css';
 // Подключаем кастомную тему Яндекс Маркет
@@ -16,27 +95,77 @@ import './styles/gas-card.css';
 
 // Обработка редиректа с 404.html для GitHub Pages
 // Если путь был сохранен в sessionStorage, восстанавливаем его
-// Только для веб-версии (не для Tauri)
+// Только для веб-версии (не для Tauri) и только для production (GitHub Pages)
 if (!(window as any).__TAURI__) {
-  const redirectPath = sessionStorage.getItem('redirectPath');
-  if (redirectPath) {
-    sessionStorage.removeItem('redirectPath');
-    // Используем history API для установки пути
-    const basename = '/AirPressure2';
-    const fullPath = basename + redirectPath + window.location.search + window.location.hash;
-    if (window.location.pathname !== basename + redirectPath) {
-      window.history.replaceState(null, '', fullPath);
+  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  if (!isLocalhost) {
+    const redirectPath = sessionStorage.getItem('redirectPath');
+    if (redirectPath) {
+      sessionStorage.removeItem('redirectPath');
+      // Используем history API для установки пути
+      const basename = '/AirPressure2';
+      const fullPath = basename + redirectPath + window.location.search + window.location.hash;
+      if (window.location.pathname !== basename + redirectPath) {
+        window.history.replaceState(null, '', fullPath);
+      }
     }
   }
 }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
-  </React.StrictMode>
-);
+// Функция для инициализации приложения
+function initApp() {
+  if (import.meta.env.DEV) {
+    console.log('[Main] Initializing app...');
+  }
+
+  // Проверяем, что root элемент существует
+  const rootElement = document.getElementById('root');
+  if (!rootElement) {
+    console.error('[Main] Root element not found!');
+    // Создаем root элемент, если его нет
+    const newRoot = document.createElement('div');
+    newRoot.id = 'root';
+    document.body.appendChild(newRoot);
+    if (import.meta.env.DEV) {
+      console.log('[Main] Created root element');
+    }
+    return initApp(); // Повторяем попытку
+  }
+
+  try {
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(
+      <React.StrictMode>
+        <Provider store={store}>
+          <App />
+        </Provider>
+      </React.StrictMode>
+    );
+
+    if (import.meta.env.DEV) {
+      console.log('[Main] App rendered successfully');
+    }
+  } catch (error) {
+    console.error('[Main] Error rendering app:', error);
+    // Показываем ошибку пользователю
+    rootElement.innerHTML = `
+      <div style="padding: 20px; font-family: Arial, sans-serif; background: white; min-height: 100vh;">
+        <h1 style="color: #d32f2f;">Ошибка загрузки приложения</h1>
+        <p>Произошла ошибка при инициализации приложения.</p>
+        <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; overflow: auto; max-width: 100%;">${error instanceof Error ? error.stack : String(error)}</pre>
+        <button onclick="location.reload()" style="margin-top: 10px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Перезагрузить</button>
+      </div>
+    `;
+  }
+}
+
+// Инициализируем приложение
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  // DOM уже загружен
+  initApp();
+}
 
 // Регистрация Service Worker для PWA (только в production)
 if ('serviceWorker' in navigator) {

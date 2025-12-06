@@ -1,9 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-
-// Базовый URL API - используем единый подход для всех окружений
-const API_BASE_URL = '/AirPressure2/api'; // Всегда используем прокси Vite
-
-console.log('[API] Base URL:', API_BASE_URL);
+import { API_BASE_URL } from '../lib/apiConfig';
 
 // Создаем инстанс axios
 const axiosInstance: AxiosInstance = axios.create({
