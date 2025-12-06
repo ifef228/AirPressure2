@@ -5,7 +5,7 @@
   "identifier": "com.atmospheric.calc",
   "build": {
     "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build:web",
+    "beforeBuildCommand": "npm run build:tauri:only",
     "devUrl": "http://localhost:5173",
     "frontendDist": "../dist"
   },

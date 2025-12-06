@@ -8,6 +8,8 @@
         "dev": "vite",
         "build": "vite build && cp public/404.html dist/ && cp public/.nojekyll dist/ && tauri build",
         "build:web": "vite build && cp public/404.html dist/ && cp public/.nojekyll dist/",
+        "build:tauri": "VITE_TAURI=true vite build && tauri build",
+        "build:tauri:only": "VITE_TAURI=true vite build",
         "preview": "vite preview",
         "predeploy": "npm run build:web",
         "deploy": "gh-pages -d dist",

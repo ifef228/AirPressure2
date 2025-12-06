@@ -15,8 +15,10 @@ import Profile from './pages/Profile';
 import Cart from './pages/Cart';
 
 const App: FC = () => {
-  // Всегда используем один basename - название репозитория
-  const basename = '/AirPressure2';
+  // Определяем basename в зависимости от окружения
+  // Для Tauri (window.__TAURI__) используем пустой basename
+  // Для веб-версии (GitHub Pages) используем '/AirPressure2'
+  const basename = (window as any).__TAURI__ ? '' : '/AirPressure2';
 
   return (
     <CartProvider>

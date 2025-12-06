@@ -16,14 +16,17 @@ import './styles/gas-card.css';
 
 // Обработка редиректа с 404.html для GitHub Pages
 // Если путь был сохранен в sessionStorage, восстанавливаем его
-const redirectPath = sessionStorage.getItem('redirectPath');
-if (redirectPath) {
-  sessionStorage.removeItem('redirectPath');
-  // Используем history API для установки пути
-  const basename = '/AirPressure2';
-  const fullPath = basename + redirectPath + window.location.search + window.location.hash;
-  if (window.location.pathname !== basename + redirectPath) {
-    window.history.replaceState(null, '', fullPath);
+// Только для веб-версии (не для Tauri)
+if (!(window as any).__TAURI__) {
+  const redirectPath = sessionStorage.getItem('redirectPath');
+  if (redirectPath) {
+    sessionStorage.removeItem('redirectPath');
+    // Используем history API для установки пути
+    const basename = '/AirPressure2';
+    const fullPath = basename + redirectPath + window.location.search + window.location.hash;
+    if (window.location.pathname !== basename + redirectPath) {
+      window.history.replaceState(null, '', fullPath);
+    }
   }
 }
 
