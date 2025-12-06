@@ -31,6 +31,24 @@ dist/
 build/
 *.class
 
+# Gradle
+.gradle/
+**/build/
+**/out/
+
+# Vite cache
+.vite/
+.vite-deps/
+
+# Kotlin build
+**/build/
+**/.gradle/
+
+# Tauri build artifacts
+**/src-tauri/target/
+**/src-tauri/target/**/*.dmg
+**/src-tauri/target/**/*.app
+
 # Environment files
 .env
 .env.local
