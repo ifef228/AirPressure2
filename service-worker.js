@@ -1,5 +1,6 @@
 // Service Worker для PWA
-const CACHE_NAME = 'atmospheric-calc-v1';
+// ВАЖНО: При изменении логики Service Worker увеличьте версию для принудительного обновления
+const CACHE_NAME = 'atmospheric-calc-v2-https-fix';
 
 // Определяем base path (для GitHub Pages это /AirPressure2Front/)
 const getBasePath = () => {
@@ -23,6 +24,7 @@ const urlsToCache = [
 // Установка Service Worker и кеширование ресурсов
 self.addEventListener('install', (event) => {
   console.log('[Service Worker] Установка Service Worker');
+  console.log('[Service Worker] Версия кеша:', CACHE_NAME);
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -43,7 +45,9 @@ self.addEventListener('install', (event) => {
 
 // Активация Service Worker и очистка старых кешей
 self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Активация Service Worker, BACKEND_URL:', BACKEND_URL);
+  console.log('[Service Worker] Активация Service Worker');
+  console.log('[Service Worker] Версия кеша:', CACHE_NAME);
+  console.log('[Service Worker] BACKEND_URL:', BACKEND_URL);
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
