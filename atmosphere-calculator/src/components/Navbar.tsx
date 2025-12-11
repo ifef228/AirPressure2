@@ -170,6 +170,16 @@ const Navbar: FC = () => {
                 >
                   Мои заявки
                 </Nav.Link>
+                {user?.role === 'ADMIN' && (
+                  <Nav.Link
+                    as={Link}
+                    to="/moderator/orders"
+                    active={location.pathname === '/moderator/orders'}
+                    className="nav-link-responsive"
+                  >
+                    Модерация
+                  </Nav.Link>
+                )}
                 <Nav.Link
                   as={Link}
                   to="/profile"

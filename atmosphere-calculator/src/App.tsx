@@ -13,6 +13,7 @@ import OrdersList from './pages/OrdersList';
 import OrderDetail from './pages/OrderDetail';
 import Profile from './pages/Profile';
 import Cart from './pages/Cart';
+import ModeratorOrdersList from './pages/ModeratorOrdersList';
 
 const App: FC = () => {
   // Определяем basename в зависимости от окружения
@@ -45,6 +46,7 @@ const App: FC = () => {
               <Route path="/register" element={<Register />} />
               <Route path="/orders" element={<OrdersList />} />
               <Route path="/orders/:id" element={<OrderDetail />} />
+              <Route path="/moderator/orders" element={<ModeratorOrdersList />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/cart" element={<Cart />} />
             </Routes>

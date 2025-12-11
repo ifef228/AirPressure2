@@ -51,6 +51,13 @@
       ]
     },
     {
+      "id": "src/pages/ModeratorOrdersList.tsx",
+      "label": "ModeratorOrdersList",
+      "routes": [
+        "/moderator/orders"
+      ]
+    },
+    {
       "id": "src/pages/Profile.tsx",
       "label": "Profile",
       "routes": [
@@ -255,6 +262,38 @@
           "column": 27,
           "endColumn": 46,
           "sourceFile": "src/pages/OrderDetail.tsx"
+        }
+      }
+    },
+    {
+      "id": "src/pages/ModeratorOrdersList.tsx:27:6-to-src/pages/Login.tsx",
+      "source": "src/pages/ModeratorOrdersList.tsx",
+      "target": "src/pages/Login.tsx",
+      "data": {
+        "viaRoute": "/login",
+        "trigger": {
+          "element": "navigate('/login')",
+          "line": 27,
+          "endLine": 27,
+          "column": 6,
+          "endColumn": 24,
+          "sourceFile": "src/pages/ModeratorOrdersList.tsx"
+        }
+      }
+    },
+    {
+      "id": "src/pages/ModeratorOrdersList.tsx:31:6-to-src/pages/OrdersList.tsx",
+      "source": "src/pages/ModeratorOrdersList.tsx",
+      "target": "src/pages/OrdersList.tsx",
+      "data": {
+        "viaRoute": "/orders",
+        "trigger": {
+          "element": "navigate('/orders')",
+          "line": 31,
+          "endLine": 31,
+          "column": 6,
+          "endColumn": 25,
+          "sourceFile": "src/pages/ModeratorOrdersList.tsx"
         }
       }
     },

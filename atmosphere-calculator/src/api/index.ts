@@ -140,6 +140,7 @@ export interface Order {
   creatorLogin?: string;
   moderatorLogin?: string;
   gases?: GasOrder[];
+  completedResultsCount?: number; // Количество записей м-м с заполненным результатом
   // Для обратной совместимости
   gasId?: number;
   temperature?: number;
@@ -285,6 +286,36 @@ export const api = {
         return response.data.data;
       }
       throw new Error(response.data?.message || 'Ошибка формирования заявки');
+    },
+    getOrdersWithFilters: async (params?: {
+      status?: string;
+      formedDateFrom?: string;
+      formedDateTo?: string;
+      page?: number;
+      size?: number;
+    }): Promise<{ items: Order[]; total: number; page: number; size: number }> => {
+      const queryParams = new URLSearchParams();
+      if (params?.status) queryParams.append('status', params.status);
+      if (params?.formedDateFrom) queryParams.append('formedDateFrom', params.formedDateFrom);
+      if (params?.formedDateTo) queryParams.append('formedDateTo', params.formedDateTo);
+      if (params?.page !== undefined) queryParams.append('page', params.page.toString());
+      if (params?.size !== undefined) queryParams.append('size', params.size.toString());
+
+      const response = await axiosInstance.get(`/gas-orders?${queryParams.toString()}`);
+      if (response.data && response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      throw new Error(response.data?.message || 'Ошибка загрузки заявок');
+    },
+    completeOrder: async (id: number, action: 'APPROVE' | 'REJECT', comment?: string): Promise<Order> => {
+      const response = await axiosInstance.put(`/gas-orders/${id}/complete`, {
+        action,
+        comment,
+      });
+      if (response.data && response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      throw new Error(response.data?.message || 'Ошибка завершения заявки');
     },
   },
 
