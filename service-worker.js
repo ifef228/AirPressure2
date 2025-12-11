@@ -92,20 +92,21 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // НЕ перехватываем запросы, которые уже идут на HTTPS прокси (порт 8443)
+  // НЕ перехватываем запросы, которые уже идут на HTTPS прокси (порт 8443) или внешние HTTPS URL
   // Эти запросы должны идти напрямую
-  const isHttpsProxy = url.protocol === 'https:' && url.port === '8443';
+  const isHttpsProxy = url.protocol === 'https:' && (url.port === '8443' || url.hostname !== 'ifef228.github.io');
   if (isHttpsProxy) {
-    console.log('[Service Worker] Пропускаем запрос к HTTPS прокси:', url.href);
+    console.log('[Service Worker] Пропускаем запрос к HTTPS прокси или внешнему HTTPS:', url.href);
     return; // Пропускаем, пусть идет напрямую
   }
 
-  // Перехватываем запросы к /api для перенаправления на бэкенд
-  // Это нужно только для production (GitHub Pages)
+  // Перехватываем ТОЛЬКО относительные запросы к /api на GitHub Pages
+  // НЕ перехватываем запросы к внешним HTTPS URL
   const isApiRequest = (
-    url.pathname.startsWith('/api') ||
-    url.pathname.startsWith('/AirPressure2Front/api') ||
-    (url.hostname.includes('github.io') && url.pathname.includes('/api'))
+    url.hostname === 'ifef228.github.io' && (
+      url.pathname.startsWith('/api') ||
+      url.pathname.startsWith('/AirPressure2Front/api')
+    )
   );
 
   console.log('[Service Worker] Запрос:', url.href, 'isApiRequest:', isApiRequest, 'BACKEND_URL:', BACKEND_URL);
@@ -294,7 +295,7 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SET_BACKEND_CONFIG') {
     const oldUrl = BACKEND_URL;
     let newUrl = null;
-    
+
     if (event.data.url) {
       newUrl = event.data.url;
     } else if (event.data.ip) {
@@ -302,14 +303,14 @@ self.addEventListener('message', (event) => {
       const port = event.data.port || '8080';
       newUrl = `${protocol}://${event.data.ip}:${port}`;
     }
-    
+
     // КРИТИЧНО: ВСЕГДА исправляем на HTTPS прокси (без условий)
     if (newUrl) {
       // ВСЕГДА принудительно исправляем на HTTPS прокси
       if (!newUrl.startsWith('https://') || !newUrl.includes(':8443')) {
         console.warn('[Service Worker] 🔒 FORCING HTTPS proxy (always)');
         console.warn('[Service Worker] Original URL:', newUrl);
-        
+
         // Извлекаем IP из URL
         const urlMatch = newUrl.match(/https?:\/\/([^\/:]+)(?::(\d+))?/);
         if (urlMatch) {
@@ -326,7 +327,7 @@ self.addEventListener('message', (event) => {
       }
       BACKEND_URL = newUrl;
     }
-    
+
     console.log('[Service Worker] Настроен бэкенд URL:', {
       old: oldUrl,
       new: BACKEND_URL,
