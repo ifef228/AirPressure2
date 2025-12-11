@@ -1,12 +1,20 @@
 import { FC, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Navbar as BSNavbar, Container, Nav } from 'react-bootstrap';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Navbar as BSNavbar, Container, Nav, Button } from 'react-bootstrap';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { logout } from '../store/authSlice';
+import { clearDraft } from '../store/draftSlice';
+import { resetFilters } from '../store/filtersSlice';
 
 // Типы цветов светофора
 type TrafficLightColor = 'red' | 'yellow' | 'green';
 
 const Navbar: FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const { draftOrder } = useAppSelector((state) => state.orders);
 
   // useState для мини-игры Светофор
   const [trafficLight, setTrafficLight] = useState<TrafficLightColor>('red');
@@ -34,16 +42,38 @@ const Navbar: FC = () => {
     green: '#28a745',
   };
 
+  // Обработчик выхода
+  const handleLogout = () => {
+    dispatch(logout());
+    dispatch(clearDraft());
+    dispatch(resetFilters());
+    navigate('/');
+  };
+
+  // Обработчик перехода к заявке
+  const handleOrderClick = () => {
+    if (draftOrder) {
+      navigate(`/orders/${draftOrder.id}`);
+    }
+  };
+
   return (
-    <BSNavbar bg="dark" variant="dark" expand="lg" className="mb-0" style={{ backgroundColor: '#ffffff' }}>
-      <Container>
-        <BSNavbar.Brand as={Link} to="/" style={{ fontSize: '1.5rem', fontWeight: '700' }}>
-          🌡️ AtmosphericTempCalc
+    <BSNavbar bg="dark" variant="dark" expand="lg" className="mb-0 navbar-custom" style={{ backgroundColor: '#ffffff' }}>
+      <Container fluid className="px-2 px-md-3">
+        <BSNavbar.Brand
+          as={Link}
+          to="/"
+          className="navbar-brand-responsive"
+          style={{ fontSize: '1.5rem', fontWeight: '700', flexShrink: 0 }}
+        >
+          🌡️ <span className="d-none d-sm-inline">AtmosphericTempCalc</span>
+          <span className="d-sm-none">ATC</span>
         </BSNavbar.Brand>
 
-        {/* Мини-игра: Светофор */}
+        {/* Мини-игра: Светофор - только на десктопе */}
         <div
           onClick={switchTrafficLight}
+          className="traffic-light-responsive d-none d-lg-flex"
           style={{
             cursor: 'pointer',
             padding: '0.5rem',
@@ -54,6 +84,9 @@ const Navbar: FC = () => {
             borderRadius: '8px',
             border: '2px solid #555',
             transition: 'transform 0.2s ease',
+            flexShrink: 0,
+            marginLeft: 'auto',
+            marginRight: '1rem',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'scale(1.1)';
@@ -65,6 +98,7 @@ const Navbar: FC = () => {
         >
           {/* Красный свет */}
           <div
+            className="traffic-light-dot"
             style={{
               width: '20px',
               height: '20px',
@@ -78,6 +112,7 @@ const Navbar: FC = () => {
 
           {/* Желтый свет */}
           <div
+            className="traffic-light-dot"
             style={{
               width: '20px',
               height: '20px',
@@ -91,6 +126,7 @@ const Navbar: FC = () => {
 
           {/* Зеленый свет */}
           <div
+            className="traffic-light-dot"
             style={{
               width: '20px',
               height: '20px',
@@ -103,13 +139,15 @@ const Navbar: FC = () => {
           />
         </div>
 
-        <BSNavbar.Toggle aria-controls="basic-navbar-nav" />
+        <BSNavbar.Toggle aria-controls="basic-navbar-nav" className="navbar-toggler-custom" />
+
         <BSNavbar.Collapse id="basic-navbar-nav">
-          <Nav className="ms-auto">
+          <Nav className="ms-auto align-items-center">
             <Nav.Link
               as={Link}
               to="/"
               active={location.pathname === '/'}
+              className="nav-link-responsive"
             >
               Главная
             </Nav.Link>
@@ -117,9 +155,74 @@ const Navbar: FC = () => {
               as={Link}
               to="/gases"
               active={location.pathname === '/gases'}
+              className="nav-link-responsive"
             >
               Услуги (Газы)
             </Nav.Link>
+
+            {isAuthenticated ? (
+              <>
+                <Nav.Link
+                  as={Link}
+                  to="/orders"
+                  active={location.pathname === '/orders'}
+                  className="nav-link-responsive"
+                >
+                  Мои заявки
+                </Nav.Link>
+                {user?.role === 'ADMIN' && (
+                  <Nav.Link
+                    as={Link}
+                    to="/moderator/orders"
+                    active={location.pathname === '/moderator/orders'}
+                    className="nav-link-responsive"
+                  >
+                    Модерация
+                  </Nav.Link>
+                )}
+                <Nav.Link
+                  as={Link}
+                  to="/profile"
+                  active={location.pathname === '/profile'}
+                  className="nav-link-responsive"
+                >
+                  Профиль
+                </Nav.Link>
+                {draftOrder && (
+                  <Button
+                    variant="warning"
+                    size="sm"
+                    onClick={handleOrderClick}
+                    className="ms-2"
+                    style={{ backgroundColor: '#FCE000', color: '#000', border: 'none', fontWeight: '600' }}
+                  >
+                    Заявка ({draftOrder.id})
+                  </Button>
+                )}
+                <Nav.Link className="nav-link-responsive">
+                  <span style={{ color: '#000', fontWeight: '600' }}>
+                    {user?.login || 'Пользователь'}
+                  </span>
+                </Nav.Link>
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="ms-2"
+                >
+                  Выход
+                </Button>
+              </>
+            ) : (
+              <Nav.Link
+                as={Link}
+                to="/login"
+                active={location.pathname === '/login'}
+                className="nav-link-responsive"
+              >
+                Вход
+              </Nav.Link>
+            )}
           </Nav>
         </BSNavbar.Collapse>
       </Container>

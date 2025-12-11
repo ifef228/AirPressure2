@@ -2,6 +2,9 @@ import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { Gas } from '../types';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { addItem } from '../store/draftSlice';
+import { createOrder } from '../store/ordersSlice';
 
 interface GasCardProps {
   gas: Gas;
@@ -12,7 +15,10 @@ const DEFAULT_IMAGE = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
 
 const GasCard: FC<GasCardProps> = ({ gas }) => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const { addToCart, isInCart } = useCart();
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { draftOrder } = useAppSelector((state) => state.orders);
   const imageUrl = gas.imageUrl || DEFAULT_IMAGE;
   const inCart = isInCart(gas.id);
 
@@ -20,10 +26,46 @@ const GasCard: FC<GasCardProps> = ({ gas }) => {
     navigate(`/gases/${gas.id}`);
   };
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
     if (!inCart) {
-      addToCart(gas.id);
+      try {
+        await addToCart(gas.id);
+      } catch (error) {
+        console.error('Ошибка при добавлении в корзину:', error);
+      }
+    }
+  };
+
+  const handleAddToOrder = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      if (draftOrder) {
+        // Если есть черновик, обновляем его
+        await dispatch(createOrder({
+          gasId: gas.id,
+          temperature: 0,
+          pressure: 0,
+        })).unwrap();
+      } else {
+        // Создаем новую заявку
+        await dispatch(createOrder({
+          gasId: gas.id,
+          temperature: 0,
+          pressure: 0,
+        })).unwrap();
+      }
+    } catch (error) {
+      console.error('Ошибка при добавлении в заявку:', error);
     }
   };
 
@@ -97,12 +139,14 @@ const GasCard: FC<GasCardProps> = ({ gas }) => {
         </div>
       </div>
 
-      {/* Кнопка "в корзину" справа */}
+      {/* Кнопки справа */}
       <div style={{
         flexShrink: 0,
         flexBasis: 'auto',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
+        gap: '0.5rem',
         marginLeft: 'auto'
       }}>
         <button

@@ -14,3 +14,13 @@ build
 .idea
 *.swp
 *.swo
+
+# Rust / Tauri build artifacts
+src-tauri/target/
+**/target/
+*.rlib
+*.rmeta
+*.so
+*.dylib
+*.dll
+*.exe

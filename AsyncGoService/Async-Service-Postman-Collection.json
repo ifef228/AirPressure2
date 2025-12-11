@@ -1,0 +1,406 @@
+{
+	"info": {
+		"_postman_id": "async-service-demo-collection",
+		"name": "AsyncGoService - Демонстрация асинхронного сервиса",
+		"description": "Коллекция для демонстрации работы асинхронного сервиса: создание задач, получение результатов с задержкой, обновление результатов вручную",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "async_url",
+			"value": "http://localhost:8081",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "async_token",
+			"value": "async123",
+			"type": "string"
+		},
+		{
+			"key": "calc_order_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "gas_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "task_id",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Получить список заявок (начальный)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    var jsonData = pm.response.json();",
+							"    if (jsonData.success && jsonData.data && jsonData.data.items && jsonData.data.items.length > 0) {",
+							"        var firstOrder = jsonData.data.items[0];",
+							"        pm.collectionVariables.set('calc_order_id', firstOrder.id);",
+							"        ",
+							"        if (firstOrder.gases && firstOrder.gases.length > 0) {",
+							"            pm.collectionVariables.set('gas_id', firstOrder.gases[0].gasId);",
+							"            console.log('Найдена заявка ID:', firstOrder.id);",
+							"            console.log('Первый газ ID:', firstOrder.gases[0].gasId);",
+							"            console.log('Результатов получено:', firstOrder.completedResultsCount || 0);",
+							"        }",
+							"    }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/gas-orders",
+					"host": ["{{base_url}}"],
+					"path": ["api", "gas-orders"]
+				},
+				"description": "Получаем список заявок. Обратите внимание на:\n- `completedResultsCount` - должно быть 0\n- `result` в газах - должно быть null\n- `tempResult` - может быть null\n\nСкрипт автоматически сохраняет ID первой заявки и ID первого газа в переменные."
+			},
+			"response": []
+		},
+		{
+			"name": "2. Создать задачу в асинхронном сервисе",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 201) {",
+							"    var jsonData = pm.response.json();",
+							"    if (jsonData.id) {",
+							"        pm.collectionVariables.set('task_id', jsonData.id);",
+							"        console.log('Задача создана:', jsonData.id);",
+							"        console.log('Статус:', jsonData.status);",
+							"    }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"type\": \"calculate\",\n    \"data\": \"{{calc_order_id}}:{{gas_id}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{async_url}}/api/tasks",
+					"host": ["{{async_url}}"],
+					"path": ["api", "tasks"]
+				},
+				"description": "Создаем задачу в асинхронном сервисе.\n\nФормат `data`: `calcOrderId:gasId` (ID заявки и ID газа через двоеточие).\n\nАсинхронный сервис обработает задачу примерно за 5 секунд и автоматически отправит результат обратно в основной сервис."
+			},
+			"response": []
+		},
+		{
+			"name": "3. Проверить статус задачи (опционально)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    var jsonData = pm.response.json();",
+							"    console.log('Статус задачи:', jsonData.status);",
+							"    console.log('Результат:', jsonData.result || 'еще не готов');",
+							"    ",
+							"    if (jsonData.status === 'completed') {",
+							"        console.log('✅ Задача завершена!');",
+							"    } else if (jsonData.status === 'processing') {",
+							"        console.log('⏳ Задача обрабатывается...');",
+							"    } else {",
+							"        console.log('⏸️ Задача в очереди');",
+							"    }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{async_url}}/api/tasks?id={{task_id}}",
+					"host": ["{{async_url}}"],
+					"path": ["api", "tasks"],
+					"query": [
+						{
+							"key": "id",
+							"value": "{{task_id}}"
+						}
+					]
+				},
+				"description": "Проверяем статус задачи в асинхронном сервисе.\n\nСтатусы:\n- `pending` - задача в очереди\n- `processing` - задача обрабатывается\n- `completed` - задача завершена\n\nЭтот запрос опционален, можно пропустить и просто подождать 5-10 секунд."
+			},
+			"response": []
+		},
+		{
+			"name": "4. Получить список заявок (после обработки)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    var jsonData = pm.response.json();",
+							"    if (jsonData.success && jsonData.data && jsonData.data.items && jsonData.data.items.length > 0) {",
+							"        var order = jsonData.data.items.find(o => o.id == pm.collectionVariables.get('calc_order_id'));",
+							"        if (order) {",
+							"            console.log('✅ Заявка найдена!');",
+							"            console.log('Результатов получено:', order.completedResultsCount || 0);",
+							"            console.log('Итоговая температура:', order.tempResult || 'не рассчитана');",
+							"            ",
+							"            if (order.gases && order.gases.length > 0) {",
+							"                var gas = order.gases[0];",
+							"                console.log('Результат для газа:', gas.result || 'не получен');",
+							"                ",
+							"                if (gas.result !== null && gas.result !== undefined) {",
+							"                    console.log('✅ Результат появился с задержкой!');",
+							"                } else {",
+							"                    console.log('⏳ Результат еще не получен, подождите еще немного...');",
+							"                }",
+							"            }",
+							"        }",
+							"    }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/gas-orders",
+					"host": ["{{base_url}}"],
+					"path": ["api", "gas-orders"]
+				},
+				"description": "Проверяем, что результат появился с задержкой.\n\n**ВАЖНО:** Подождите 5-10 секунд после создания задачи (шаг 2) перед выполнением этого запроса!\n\nТеперь должны увидеть:\n- `completedResultsCount` увеличился (например, с 0 до 1)\n- `gases[0].result` появилось значение (например, `15.80`)\n- `tempResult` обновился"
+			},
+			"response": []
+		},
+		{
+			"name": "5. Обновить результат вручную с ключом",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    var jsonData = pm.response.json();",
+							"    console.log('✅ Результат успешно обновлен!');",
+							"    console.log('Ответ:', jsonData.message || jsonData.data);",
+							"} else {",
+							"    console.log('❌ Ошибка:', pm.response.code);",
+							"    if (pm.response.code === 401) {",
+							"        console.log('Проверьте токен X-Async-Token (должен быть async123)');",
+							"    }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Async-Token",
+						"value": "{{async_token}}",
+						"description": "Токен авторизации асинхронного сервиса (8 байт)"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"results\": [\n        {\n            \"calcOrderId\": {{calc_order_id}},\n            \"gasId\": {{gas_id}},\n            \"result\": 25.50\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/gas-orders/async-results",
+					"host": ["{{base_url}}"],
+					"path": ["api", "gas-orders", "async-results"]
+				},
+				"description": "Обновляем результат вручную с использованием токена асинхронного сервиса.\n\n**Параметры:**\n- `calcOrderId` - ID заявки (берется из переменной)\n- `gasId` - ID газа (берется из переменной)\n- `result` - новое значение результата (температура)\n\n**Токен:** `async123` (8 символов, задается в заголовке `X-Async-Token`)\n\nЭтот метод имитирует отправку результата от асинхронного сервиса."
+			},
+			"response": []
+		},
+		{
+			"name": "6. Получить список заявок (финальная проверка)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    var jsonData = pm.response.json();",
+							"    if (jsonData.success && jsonData.data && jsonData.data.items && jsonData.data.items.length > 0) {",
+							"        var order = jsonData.data.items.find(o => o.id == pm.collectionVariables.get('calc_order_id'));",
+							"        if (order) {",
+							"            console.log('✅ Финальная проверка:');",
+							"            console.log('Итоговая температура:', order.tempResult || 'не рассчитана');",
+							"            ",
+							"            if (order.gases && order.gases.length > 0) {",
+							"                var gas = order.gases[0];",
+							"                console.log('Результат для газа:', gas.result || 'не получен');",
+							"                ",
+							"                if (gas.result === 25.50) {",
+							"                    console.log('✅ Результат успешно обновлен на новое значение!');",
+							"                } else {",
+							"                    console.log('⚠️ Результат:', gas.result);",
+							"                }",
+							"            }",
+							"        }",
+							"    }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/gas-orders",
+					"host": ["{{base_url}}"],
+					"path": ["api", "gas-orders"]
+				},
+				"description": "Проверяем, что результат изменился на новое значение (например, с `15.80` на `25.50`).\n\nТеперь должны увидеть:\n- `result` изменился на новое значение\n- `tempResult` обновился"
+			},
+			"response": []
+		},
+		{
+			"name": "Дополнительно: Проверка здоровья асинхронного сервиса",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{async_url}}/api/health",
+					"host": ["{{async_url}}"],
+					"path": ["api", "health"]
+				},
+				"description": "Проверяем статус асинхронного сервиса.\n\nВозвращает:\n- `status` - статус сервиса\n- `workers` - количество воркеров\n- `queue_size` - размер очереди"
+			},
+			"response": []
+		},
+		{
+			"name": "Дополнительно: Получить все задачи",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{async_url}}/api/tasks",
+					"host": ["{{async_url}}"],
+					"path": ["api", "tasks"]
+				},
+				"description": "Получаем список всех задач в асинхронном сервисе."
+			},
+			"response": []
+		}
+	]
+}
