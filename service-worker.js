@@ -61,8 +61,8 @@ self.addEventListener('activate', (event) => {
 
 // Конфигурация API для перехвата запросов (для GitHub Pages)
 // Установите BACKEND_URL через сообщение от клиента или используйте значение по умолчанию
-// Используем HTTP для локальной сети (не HTTPS)
-let BACKEND_URL = 'http://192.168.1.13:8080';
+// Используем HTTPS прокси по умолчанию
+let BACKEND_URL = 'https://192.168.1.13:8443';
 
 // Перехват сетевых запросов
 self.addEventListener('fetch', (event) => {
@@ -90,6 +90,14 @@ self.addEventListener('fetch', (event) => {
   if (isLocalhost && url.port === '5173' && url.pathname.startsWith('/AirPressure2Front/api')) {
     console.log('[Service Worker] Пропускаем запрос к прокси Vite:', url.href);
     return;
+  }
+
+  // НЕ перехватываем запросы, которые уже идут на HTTPS прокси (порт 8443)
+  // Эти запросы должны идти напрямую
+  const isHttpsProxy = url.protocol === 'https:' && url.port === '8443';
+  if (isHttpsProxy) {
+    console.log('[Service Worker] Пропускаем запрос к HTTPS прокси:', url.href);
+    return; // Пропускаем, пусть идет напрямую
   }
 
   // Перехватываем запросы к /api для перенаправления на бэкенд
@@ -285,13 +293,40 @@ self.addEventListener('message', (event) => {
   // Настройка бэкенда для перехвата API запросов
   if (event.data && event.data.type === 'SET_BACKEND_CONFIG') {
     const oldUrl = BACKEND_URL;
+    let newUrl = null;
+    
     if (event.data.url) {
-      BACKEND_URL = event.data.url;
+      newUrl = event.data.url;
     } else if (event.data.ip) {
       const protocol = event.data.https ? 'https' : 'http';
       const port = event.data.port || '8080';
-      BACKEND_URL = `${protocol}://${event.data.ip}:${port}`;
+      newUrl = `${protocol}://${event.data.ip}:${port}`;
     }
+    
+    // КРИТИЧНО: ВСЕГДА исправляем на HTTPS прокси (без условий)
+    if (newUrl) {
+      // ВСЕГДА принудительно исправляем на HTTPS прокси
+      if (!newUrl.startsWith('https://') || !newUrl.includes(':8443')) {
+        console.warn('[Service Worker] 🔒 FORCING HTTPS proxy (always)');
+        console.warn('[Service Worker] Original URL:', newUrl);
+        
+        // Извлекаем IP из URL
+        const urlMatch = newUrl.match(/https?:\/\/([^\/:]+)(?::(\d+))?/);
+        if (urlMatch) {
+          const ip = urlMatch[1];
+          // ВСЕГДА используем HTTPS и порт 8443
+          newUrl = `https://${ip}:8443`;
+          console.warn('[Service Worker] Fixed to HTTPS proxy:', newUrl);
+        } else {
+          // Если не удалось извлечь, просто заменяем
+          newUrl = newUrl
+            .replace('http://', 'https://')
+            .replace(':8080', ':8443');
+        }
+      }
+      BACKEND_URL = newUrl;
+    }
+    
     console.log('[Service Worker] Настроен бэкенд URL:', {
       old: oldUrl,
       new: BACKEND_URL,
