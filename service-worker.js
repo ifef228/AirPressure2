@@ -1,11 +1,11 @@
 // Service Worker для PWA
 const CACHE_NAME = 'atmospheric-calc-v1';
 
-// Определяем base path (для GitHub Pages это /AirPressure2/)
+// Определяем base path (для GitHub Pages это /AirPressure2Front/)
 const getBasePath = () => {
   const scope = self.registration?.scope || self.location.pathname;
-  if (scope.includes('/AirPressure2/')) {
-    return '/AirPressure2';
+  if (scope.includes('/AirPressure2Front/')) {
+    return '/AirPressure2Front';
   }
   return '';
 };
@@ -86,8 +86,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Также пропускаем запросы к /AirPressure2/api на localhost:5173 (прокси Vite)
-  if (isLocalhost && url.port === '5173' && url.pathname.startsWith('/AirPressure2/api')) {
+  // Также пропускаем запросы к /AirPressure2Front/api на localhost:5173 (прокси Vite)
+  if (isLocalhost && url.port === '5173' && url.pathname.startsWith('/AirPressure2Front/api')) {
     console.log('[Service Worker] Пропускаем запрос к прокси Vite:', url.href);
     return;
   }
@@ -96,7 +96,7 @@ self.addEventListener('fetch', (event) => {
   // Это нужно только для production (GitHub Pages)
   const isApiRequest = (
     url.pathname.startsWith('/api') ||
-    url.pathname.startsWith('/AirPressure2/api') ||
+    url.pathname.startsWith('/AirPressure2Front/api') ||
     (url.hostname.includes('github.io') && url.pathname.includes('/api'))
   );
 
@@ -126,8 +126,8 @@ self.addEventListener('fetch', (event) => {
         try {
           // Извлекаем путь API (убираем base path если есть)
           let apiPath = url.pathname;
-          if (apiPath.startsWith('/AirPressure2/api')) {
-            apiPath = apiPath.replace('/AirPressure2/api', '/api');
+          if (apiPath.startsWith('/AirPressure2Front/api')) {
+            apiPath = apiPath.replace('/AirPressure2Front/api', '/api');
           } else if (apiPath.startsWith('/api')) {
             // Уже правильный путь
           } else {
