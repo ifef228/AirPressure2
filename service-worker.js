@@ -1,6 +1,6 @@
 // Service Worker для PWA
 // ВАЖНО: При изменении логики Service Worker увеличьте версию для принудительного обновления
-const CACHE_NAME = 'atmospheric-calc-v2-https-fix';
+const CACHE_NAME = 'atmospheric-calc-v3-https-fix-aggressive';
 
 // Определяем base path (для GitHub Pages это /AirPressure2Front/)
 const getBasePath = () => {
@@ -65,7 +65,8 @@ self.addEventListener('activate', (event) => {
 
 // Конфигурация API для перехвата запросов (для GitHub Pages)
 // Установите BACKEND_URL через сообщение от клиента или используйте значение по умолчанию
-// Используем HTTPS прокси по умолчанию
+// ВАЖНО: Service Worker НЕ должен перехватывать запросы к внешним HTTPS URL
+// Используем HTTPS прокси по умолчанию (но это не используется, т.к. внешние HTTPS не перехватываются)
 let BACKEND_URL = 'https://192.168.1.13:8443';
 
 // Перехват сетевых запросов
@@ -80,9 +81,24 @@ self.addEventListener('fetch', (event) => {
   // КРИТИЧНО: ПЕРВЫМ делом проверяем - это внешний HTTPS запрос?
   // Если да - НЕМЕДЛЕННО пропускаем, не перехватываем
   // Это включает запросы к HTTPS прокси (например, https://192.168.1.13:8443)
+
+  // Проверка 1: Это HTTPS и НЕ GitHub Pages?
   const isExternalHttps = url.protocol === 'https:' && !url.hostname.includes('github.io');
-  if (isExternalHttps) {
+
+  // Проверка 2: Это порт 8443 (HTTPS прокси)?
+  const isHttpsProxyPort = url.port === '8443';
+
+  // Проверка 3: Это IP адрес (локальная сеть)?
+  const isIpAddress = /^\d+\.\d+\.\d+\.\d+$/.test(url.hostname);
+
+  // Если любое из условий выполнено - пропускаем
+  if (isExternalHttps || isHttpsProxyPort || (isIpAddress && url.protocol === 'https:')) {
     console.log('[Service Worker] ✅ Пропускаем внешний HTTPS запрос (не перехватываем):', url.href);
+    console.log('[Service Worker] Причина:', {
+      isExternalHttps,
+      isHttpsProxyPort,
+      isIpAddress: isIpAddress && url.protocol === 'https:'
+    });
     return; // Пропускаем, пусть идет напрямую к HTTPS прокси
   }
 
