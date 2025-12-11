@@ -73,6 +73,15 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
+  // КРИТИЧНО: ПЕРВЫМ делом проверяем - это внешний HTTPS запрос?
+  // Если да - НЕМЕДЛЕННО пропускаем, не перехватываем
+  // Это включает запросы к HTTPS прокси (например, https://192.168.1.13:8443)
+  const isExternalHttps = url.protocol === 'https:' && !url.hostname.includes('github.io');
+  if (isExternalHttps) {
+    console.log('[Service Worker] ✅ Пропускаем внешний HTTPS запрос (не перехватываем):', url.href);
+    return; // Пропускаем, пусть идет напрямую к HTTPS прокси
+  }
+
   // В development режиме (localhost) не перехватываем запросы вообще
   // Service Worker нужен только для production (GitHub Pages)
   const isLocalhost = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
@@ -92,16 +101,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // НЕ перехватываем запросы, которые уже идут на HTTPS прокси (порт 8443) или внешние HTTPS URL
-  // Эти запросы должны идти напрямую
-  const isHttpsProxy = url.protocol === 'https:' && (url.port === '8443' || url.hostname !== 'ifef228.github.io');
-  if (isHttpsProxy) {
-    console.log('[Service Worker] Пропускаем запрос к HTTPS прокси или внешнему HTTPS:', url.href);
-    return; // Пропускаем, пусть идет напрямую
-  }
-
   // Перехватываем ТОЛЬКО относительные запросы к /api на GitHub Pages
-  // НЕ перехватываем запросы к внешним HTTPS URL
+  // НЕ перехватываем запросы к внешним HTTPS URL (они уже обработаны выше)
   const isApiRequest = (
     url.hostname === 'ifef228.github.io' && (
       url.pathname.startsWith('/api') ||
