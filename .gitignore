@@ -1,0 +1,55 @@
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# Logs
+*.log
+logs/
+
+# Rust build artifacts (Tauri)
+**/target/
+*.rlib
+*.rmeta
+
+# Node modules
+node_modules/
+
+# Build outputs
+dist/
+build/
+*.class
+
+# Gradle
+.gradle/
+**/build/
+**/out/
+
+# Vite cache
+.vite/
+.vite-deps/
+
+# Kotlin build
+**/build/
+**/.gradle/
+
+# Tauri build artifacts
+**/src-tauri/target/
+**/src-tauri/target/**/*.dmg
+**/src-tauri/target/**/*.app
+
+# Environment files
+.env
+.env.local
+.env.*.local

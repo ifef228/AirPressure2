@@ -44,8 +44,15 @@ const GasesList: FC = () => {
         setError('Бэкенд недоступен. Показаны тестовые данные.');
       }
     } catch (err) {
-      setError('Ошибка при загрузке данных');
-      console.error(err);
+      console.error('Error loading gases:', err);
+      // При ошибке загружаем моки напрямую
+      const mockResponse = await import('../data/mockGasesData').then(m =>
+        m.getMockGasesPaginated(currentPage, pageSize, nameFilter)
+      );
+      setGases(mockResponse.items);
+      setTotalPages(mockResponse.totalPages);
+      setTotalItems(mockResponse.totalItems);
+      setError('Бэкенд недоступен. Показаны тестовые данные.');
     } finally {
       setLoading(false);
     }
